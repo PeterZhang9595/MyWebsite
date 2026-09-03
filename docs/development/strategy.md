@@ -234,6 +234,12 @@ Conversation history is not a durable project specification.
 - Before declaring a task ready for review, compare the original requirement and
   confirmed chat decisions against the written documentation.
 
+## 9.1 文档语言
+
+助手新生成的项目文档必须统一使用简体中文。代码标识符、命令、路径、配置键、包名、公开 URL 和专有名词在翻译会降低准确性时可以保留原文。
+
+助手对现有文档进行实质重写时，重写后的文档也必须使用简体中文。此前已经形成的英文历史文档可以作为历史例外保留，除非用户明确要求翻译。用户编写的需求文件继续保持只读，未经具体授权不得翻译或重写。
+
 ## 10. Frontend design process
 
 Use the `frontend-design` skill as a design reference and quality constraint for

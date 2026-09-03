@@ -87,6 +87,7 @@ of requirement names when they describe a long-lived part of the website.
 - The assistant maintains current implementation, environment, testing, and
   deployment documentation when affected by approved work.
 - The assistant must not treat an unapproved proposal as a project decision.
+- 助手新生成的文档统一使用简体中文。命令、路径、标识符、包名、URL 和专有名词为了技术准确性可以保留原文。现有英文历史文件继续有效，除非用户明确要求翻译。
 
 ## Screenshots
 
