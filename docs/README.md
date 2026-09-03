@@ -52,7 +52,7 @@ and historical records are updated only after explicit acceptance.
 | `records/` | Historical record for every accepted requirement that changed the repository, including documentation-only changes. |
 | `implement-roadmap/` | Requirement-specific implementation approaches and plans prepared before coding. Omission requires explicit user approval. |
 | `testing-strategies/` | Active testing policy and future test-specific guidance. |
-| `env-list/` | Current reproducible environment requirements, maintained in `environment.md`. Never stores secrets. |
+| `env-list/` | Current reproducible environment requirements, maintained in [`environment.md`](env-list/environment.md). Never stores secrets. |
 
 ## File naming
 
