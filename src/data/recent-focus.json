@@ -1,0 +1,30 @@
+[
+  {
+    "id": "long-lived-website",
+    "title": {
+      "zh": "长期维护的个人网站",
+      "en": "A long-lived personal website"
+    },
+    "description": {
+      "zh": "验证中文列表与说明文字的临时内容。",
+      "en": "Temporary copy for testing list typography."
+    },
+    "order": 1
+  },
+  {
+    "id": "machine-learning",
+    "title": {
+      "zh": "机器学习与强化学习",
+      "en": "Machine learning and reinforcement learning"
+    },
+    "order": 2
+  },
+  {
+    "id": "knowledge-organization",
+    "title": {
+      "zh": "知识整理方法",
+      "en": "Knowledge organization"
+    },
+    "order": 3
+  }
+]

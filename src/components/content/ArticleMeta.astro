@@ -1,0 +1,6 @@
+---
+import type { ContentDates, Lang } from '../../lib/types';
+const { dates, lang } = Astro.props as { dates: ContentDates | null; lang: Lang };
+const format = new Intl.DateTimeFormat(lang === 'zh' ? 'zh-CN' : 'en-US', { dateStyle: 'medium' });
+---
+{dates && <div class="article-meta" data-pagefind-ignore><span>{lang === 'zh' ? '发布于' : 'Published'} {format.format(dates.publishedAt)}</span>{dates.updatedAt.getTime() !== dates.publishedAt.getTime() && <span>{lang === 'zh' ? '更新于' : 'Updated'} {format.format(dates.updatedAt)}</span>}</div>}

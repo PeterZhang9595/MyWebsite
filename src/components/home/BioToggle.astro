@@ -1,0 +1,20 @@
+---
+import { ui } from '../../i18n';
+import type { Lang } from '../../lib/types';
+interface Props { lang: Lang; hasDefault: boolean; hasLong: boolean }
+const { lang, hasDefault, hasLong } = Astro.props;
+---
+<section class="bio-section" data-pagefind-ignore>
+  <div class="bio-toolbar"><span>{ui(lang,'bio')}</span><div class="bio-options"><button type="button" aria-pressed="true" data-bio-choice="default">{ui(lang,'defaultBio')}</button>{hasLong && <button type="button" aria-pressed="false" data-bio-choice="long">{ui(lang,'longBio')}</button>}</div></div>
+  <div class="bio-panel" data-bio-panel="default">{hasDefault ? <slot name="default" /> : <p>{ui(lang,'empty')}</p>}</div>
+  {hasLong && <div class="bio-panel" data-bio-panel="long" hidden><slot name="long" /></div>}
+</section>
+<script is:inline>
+  document.querySelectorAll('.bio-section').forEach((section) => {
+    section.querySelectorAll('[data-bio-choice]').forEach((button) => button.addEventListener('click', () => {
+      const choice = button.getAttribute('data-bio-choice');
+      section.querySelectorAll('[data-bio-choice]').forEach((item) => item.setAttribute('aria-pressed', String(item === button)));
+      section.querySelectorAll('[data-bio-panel]').forEach((panel) => { panel.hidden = panel.getAttribute('data-bio-panel') !== choice; });
+    }));
+  });
+</script>

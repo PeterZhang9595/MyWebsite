@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.astro/
+.superpowers/
+.worktrees/
+playwright-report/
+test-results/
+tests/artifacts/**
+!tests/artifacts/.gitignore
+.DS_Store
+Thumbs.db

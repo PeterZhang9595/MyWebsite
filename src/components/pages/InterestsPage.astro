@@ -1,0 +1,18 @@
+---
+import { render } from 'astro:content';
+import ContentLayout from '../../layouts/ContentLayout.astro';
+import ArticleMeta from '../content/ArticleMeta.astro';
+import { loadPublicContent } from '../../lib/content-repository';
+import { contentSegments } from '../../lib/content-navigation';
+import { sectionPath } from '../../i18n';
+import { withBase } from '../../lib/urls';
+import { buildAlternates } from '../../lib/seo';
+import type { Lang } from '../../lib/types';
+const { lang } = Astro.props as { lang: Lang };
+const item = (await loadPublicContent('interests',lang)).find((entry)=>entry.data.slug==='interests');
+const other = lang==='zh'?'en':'zh';
+const title = item?.data.title ?? (lang==='zh'?'兴趣':'Interests');
+const description = item?.data.description ?? (lang==='zh'?'内容整理中':'Content pending');
+const Content = item ? (await render(item.entry)).Content : null;
+---
+<ContentLayout {lang} {title} {description} languageHref={sectionPath(other,'interests')} canonicalPath={sectionPath(lang,'interests')} alternates={buildAlternates(sectionPath('zh','interests'),sectionPath('en','interests'))} segments={contentSegments(lang,'interests','interests',title)} parentHref={withBase(lang==='zh'?'/':'/en/')} searchable={Boolean(item)}>{item && <ArticleMeta dates={item.dates} {lang}/>}<div class="prose">{Content ? <Content/> : <p>{description}</p>}</div></ContentLayout>

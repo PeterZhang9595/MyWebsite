@@ -1,0 +1,9 @@
+---
+import { Play } from '@lucide/astro';
+import { ui } from '../../i18n';
+import { loadMusic } from '../../lib/local-data';
+import type { Lang } from '../../lib/types';
+const { lang } = Astro.props as { lang: Lang };
+const track = loadMusic()[0];
+---
+<section class="player" data-pagefind-ignore aria-label={lang==='zh'?'音乐播放器':'Music player'}><span class="player__disc"></span><span style="flex:1"><strong>{track?.title ?? ui(lang,'playlistPending')}</strong><br/><small>{track?.artist ?? 'No track available'}</small></span><button disabled={!track} aria-label="Play"><Play size={17}/></button></section>

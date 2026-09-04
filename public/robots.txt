@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://peterzhang9595.github.io/MyWebsite/sitemap-index.xml

@@ -1,0 +1,7 @@
+---
+import { withBase, contentPath } from '../../lib/urls';
+import type { ContentItem } from '../../lib/content-repository';
+import type { Lang } from '../../lib/types';
+const { lang, directories, articles } = Astro.props as { lang: Lang; directories: ContentItem[]; articles: ContentItem[] };
+---
+<div class="directory-list">{directories.length > 0 && <section><h2>{lang === 'zh' ? '目录' : 'Directories'}</h2><ul>{directories.map((item)=><li><a href={withBase(contentPath(lang,item.data.slug))}>{item.data.title}</a></li>)}</ul></section>}{articles.length > 0 && <section><h2>{lang === 'zh' ? '文章' : 'Articles'}</h2><ul>{articles.map((item)=><li><a href={withBase(contentPath(lang,item.data.slug))}>{item.data.title}</a></li>)}</ul></section>}{!directories.length && !articles.length && <p>{lang === 'zh' ? '内容整理中' : 'Content pending'}</p>}</div>

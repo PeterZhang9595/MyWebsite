@@ -1,0 +1,8 @@
+---
+import type { Lang } from '../../lib/types';
+import QuoteRotator from './QuoteRotator.astro';
+import IllustrationMedia from './IllustrationMedia.astro';
+import MusicPlayerShell from './MusicPlayerShell.astro';
+const { lang } = Astro.props as { lang: Lang };
+---
+<aside class="home-aside"><QuoteRotator lang={lang}/><IllustrationMedia/><MusicPlayerShell {lang}/></aside>

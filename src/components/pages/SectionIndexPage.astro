@@ -1,0 +1,20 @@
+---
+import { render } from 'astro:content';
+import ContentLayout from '../../layouts/ContentLayout.astro';
+import DirectoryIndex from '../content/DirectoryIndex.astro';
+import { directChildren, loadPublicContent } from '../../lib/content-repository';
+import { contentSegments } from '../../lib/content-navigation';
+import { sectionPath, ui } from '../../i18n';
+import { withBase } from '../../lib/urls';
+import { buildAlternates } from '../../lib/seo';
+import type { Lang, Section } from '../../lib/types';
+const { lang, section } = Astro.props as { lang: Lang; section: Section };
+const items = await loadPublicContent(section,lang);
+const root = items.find((item)=>item.data.slug===section && item.isDirectory);
+const children = directChildren(items,section);
+const RootContent = root ? (await render(root.entry)).Content : null;
+const title = root?.data.title ?? ui(lang,section);
+const description = root?.data.description ?? ui(lang,'empty');
+const other = lang === 'zh' ? 'en' : 'zh';
+---
+<ContentLayout {lang} {title} {description} languageHref={sectionPath(other,section)} canonicalPath={sectionPath(lang,section)} alternates={buildAlternates(sectionPath('zh',section),sectionPath('en',section))} segments={contentSegments(lang,section,section,title)} parentHref={withBase(lang==='zh'?'/':'/en/')}>{RootContent && <div class="prose"><RootContent/></div>}<DirectoryIndex {lang} {...children}/></ContentLayout>

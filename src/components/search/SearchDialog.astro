@@ -1,0 +1,23 @@
+---
+import { Search, X } from '@lucide/astro';
+import { ui } from '../../i18n';
+import { withBase } from '../../lib/urls';
+import type { Lang } from '../../lib/types';
+const { lang } = Astro.props as { lang: Lang };
+---
+<dialog class="search-dialog" data-search-dialog data-lang={lang} data-module={withBase('/pagefind/pagefind.js')} data-empty={lang==='zh'?'输入文字开始搜索。':'Type to search.'} data-none={lang==='zh'?'没有结果。':'No results.'} data-unavailable={lang==='zh'?'搜索索引暂时不可用。':'Search index unavailable.'} data-pagefind-ignore>
+  <div class="search-dialog__header"><Search size={18}/><input type="search" placeholder={ui(lang,'search')} aria-label={ui(lang,'search')} data-search-input/><button type="button" data-search-close aria-label={lang==='zh'?'关闭搜索':'Close search'}><X size={18}/></button></div>
+  <div class="search-results" data-search-results aria-live="polite"><p>{lang==='zh'?'输入文字开始搜索。':'Type to search.'}</p></div>
+</dialog>
+<script is:inline>
+  (() => {
+    const dialog = document.querySelector('[data-search-dialog]'); if (!dialog) return;
+    const input = dialog.querySelector('[data-search-input]'); const results = dialog.querySelector('[data-search-results]'); let api; let apiPromise; let trigger;
+    const message=(value)=>`<p>${value}</p>`; const loadApi=()=>apiPromise??=(async()=>{try{api=await import(dialog.dataset.module);await api.init();return api}catch(error){console.error('Pagefind init failed',error);results.innerHTML=message(dialog.dataset.unavailable);return null}})(); const open = (button) => { trigger=button; dialog.showModal(); input.focus();void loadApi(); };
+    document.querySelectorAll('[data-search-trigger]').forEach((button)=>button.addEventListener('click',()=>open(button)));
+    dialog.querySelector('[data-search-close]').addEventListener('click',()=>dialog.close());
+    dialog.addEventListener('close',()=>trigger?.focus());
+    document.addEventListener('keydown',(event)=>{if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==='k'){event.preventDefault();open(document.activeElement)}else if(event.key==='Escape'&&dialog.open){dialog.close()}});
+    input.addEventListener('input',async()=>{const query=input.value.trim();if(!query){results.innerHTML=message(dialog.dataset.empty);return}const loaded=await loadApi();if(!loaded||input.value.trim()!==query)return;const search=await loaded.search(query,{filters:{lang:dialog.dataset.lang}});const data=await Promise.all(search.results.slice(0,8).map((r)=>r.data()));results.innerHTML=data.length?`<ul>${data.map((item)=>`<li><a href="${item.url}"><strong>${item.meta.title||item.url}</strong><span>${item.excerpt||''}</span></a></li>`).join('')}</ul>`:message(dialog.dataset.none)});
+  })();
+</script>

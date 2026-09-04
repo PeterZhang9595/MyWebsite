@@ -1,0 +1,9 @@
+---
+import type { PathSegment } from '../../lib/types';
+interface Props { segments: PathSegment[]; parentHref?: string }
+const { segments, parentHref } = Astro.props;
+---
+<nav class="terminal-path" aria-label="Path">
+  <div class="terminal-path__line"><span>peter@website:</span>{segments.map((segment, index) => <>{segment.href ? <a href={segment.href}>{segment.label}</a> : <span class="terminal-path__current">{segment.label}</span>}{index < segments.length - 1 && <span>/</span>}</>)}<span>$</span></div>
+  {parentHref && <a class="terminal-path__up" href={parentHref}>cd ..</a>}
+</nav>

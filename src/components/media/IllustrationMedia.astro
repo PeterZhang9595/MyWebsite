@@ -1,0 +1,9 @@
+---
+interface Props { poster?: string; videoWebm?: string; videoMp4?: string; alt?: string }
+const { poster, videoWebm, videoMp4, alt = 'Illustration / Video' } = Astro.props;
+const hasVideo = Boolean(videoWebm || videoMp4);
+---
+<div class="illustration" data-illustration data-has-video={String(hasVideo)}>{poster && <img src={poster} alt={alt}/>} {hasVideo && <video muted playsinline preload="none" poster={poster} aria-label={alt}>{videoWebm && <source src={videoWebm} type="video/webm" media="(min-width: 881px) and (prefers-reduced-motion: no-preference)"/>}{videoMp4 && <source src={videoMp4} type="video/mp4" media="(min-width: 881px) and (prefers-reduced-motion: no-preference)"/>}</video>}{!poster && !hasVideo && <div role="img" aria-label="插画视频位置">Illustration / Video<br/><small>Poster and video pending</small></div>}</div>
+{hasVideo && <script is:inline>
+  document.querySelectorAll('[data-illustration][data-has-video="true"]').forEach((root)=>{const video=root.querySelector('video');let timer;root.addEventListener('pointerenter',()=>{if(matchMedia('(prefers-reduced-motion: reduce)').matches||matchMedia('(max-width: 880px)').matches)return;timer=setTimeout(()=>video.play().catch(()=>{}),200)});root.addEventListener('pointerleave',()=>{clearTimeout(timer);video.pause();video.currentTime=0})});
+</script>}

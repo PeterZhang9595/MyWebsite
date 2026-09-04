@@ -1,0 +1,22 @@
+---
+import { Languages, Moon, Search } from '@lucide/astro';
+import { ui } from '../../i18n';
+import { withBase } from '../../lib/urls';
+import type { Lang } from '../../lib/types';
+interface Props { lang: Lang; languageHref: string }
+const { lang, languageHref } = Astro.props;
+---
+<nav class="utility-toolbar" aria-label={lang==='zh'?'页面工具':'Page tools'} data-pagefind-ignore>
+  <a href={withBase(languageHref)} aria-label={ui(lang, 'switchLanguage')}><Languages size={18}/><span>中 / EN</span></a>
+  <button type="button" data-theme-toggle aria-label={ui(lang, 'theme')}><Moon size={18}/></button>
+  <button type="button" data-search-trigger aria-label={ui(lang, 'search')}><Search size={18}/></button>
+</nav>
+<script is:inline>
+  document.querySelectorAll('[data-theme-toggle]').forEach((button) => {
+    button.addEventListener('click', () => {
+      const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+      document.documentElement.dataset.theme = next;
+      try { localStorage.setItem('theme', next); } catch {}
+    });
+  });
+</script>

@@ -1,0 +1,33 @@
+---
+import '../styles/global.css';
+import UtilityToolbar from '../components/ui/UtilityToolbar.astro';
+import { htmlLang } from '../i18n';
+import { canonicalUrl } from '../lib/urls';
+import { siteConfig } from '../site.config';
+import type { Lang } from '../lib/types';
+import SearchDialog from '../components/search/SearchDialog.astro';
+interface Props { lang: Lang; title?: string; description?: string; languageHref: string; canonicalPath?: string; alternates?: {hreflang:string;href:string}[]; article?: boolean; dates?: {publishedAt:Date;updatedAt:Date}|null }
+const { lang, title = siteConfig.name, description = siteConfig.description[lang], languageHref, canonicalPath = lang === 'zh' ? '/' : '/en/', alternates = [], article = false, dates = null } = Astro.props;
+const canonical = canonicalUrl(canonicalPath);
+const jsonLd = article ? { '@context':'https://schema.org','@type':'Article',headline:title,url:canonical,author:{'@type':'Person',name:siteConfig.name},...(dates?{datePublished:dates.publishedAt.toISOString(),dateModified:dates.updatedAt.toISOString()}:{}) } : { '@context':'https://schema.org','@type':'Person',name:siteConfig.name,url:canonical,sameAs:[siteConfig.githubUrl] };
+---
+<!doctype html>
+<html lang={htmlLang[lang]} data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    {alternates.map((alternate)=><link rel="alternate" hreflang={alternate.hreflang} href={alternate.href}/>)}
+    <meta property="og:title" content={title}/><meta property="og:description" content={description}/><meta property="og:url" content={canonical}/><meta property="og:type" content={article?'article':'website'}/><meta property="og:image" content={canonicalUrl('/social/default.png')}/>
+    <script is:inline type="application/ld+json" set:html={JSON.stringify(jsonLd).replaceAll('<','\\u003c')}></script>
+    <title>{title === siteConfig.name ? title : `${title} · ${siteConfig.name}`}</title>
+    <script is:inline>try{const saved=localStorage.getItem('theme');document.documentElement.dataset.theme=saved==='dark'?'dark':'light'}catch{document.documentElement.dataset.theme='light'}</script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Skip to content</a>
+    <UtilityToolbar lang={lang} languageHref={languageHref} />
+    <SearchDialog {lang}/>
+    <div class="site-shell"><div class="page-frame"><slot /></div></div>
+  </body>
+</html>

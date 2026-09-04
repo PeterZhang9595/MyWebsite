@@ -8,7 +8,7 @@
 
 ## Source requirement
 
-- [2026-09-03-development-strategy-init](../requirements/2026-09-03-development-strategy-init)
+- [2026-09-03-development-strategy-init.md](../requirements/2026-09-03-development-strategy-init.md)
 
 The source requirement remains user-owned and was not edited, renamed, or moved.
 
@@ -109,3 +109,7 @@ No staging, commit, branch, merge, push, pull, revert, tag, or release operation
 was performed. The accepted governance documents are ready for the user to review
 and include in a Git update together with any other intended untracked project
 files.
+
+## 历史修正
+
+2026-09-04：需求文件后来统一补充了 `.md` 后缀，本记录同步修正相对链接；原有历史结论未改变。

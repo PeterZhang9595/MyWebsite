@@ -1,0 +1,26 @@
+:root {
+  --bg: #ffffff;
+  --text: #282828;
+  --heading: #282828;
+  --muted: #676767;
+  --surface: #f3f3f2;
+  --divider: #e2e2df;
+  --focus: #6657c8;
+  --terminal-highlight: #fff9df;
+  --reading: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, "Songti SC", STSong, SimSun, serif;
+  --ui: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", "PingFang SC", sans-serif;
+  --mono: "SFMono-Regular", "SF Mono", Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  --bg: #1b1a19;
+  --text: #e8e5df;
+  --heading: #f4f1eb;
+  --muted: #aaa59e;
+  --surface: #242321;
+  --divider: #3b3936;
+  --focus: #b7acf5;
+  --terminal-highlight: #302c22;
+  color-scheme: dark;
+}

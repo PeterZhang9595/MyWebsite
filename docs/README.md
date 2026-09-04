@@ -17,6 +17,14 @@ developers. This file documents the internal documentation system.
 - The repository root [`AGENTS.md`](../AGENTS.md) automatically directs coding
   agents to these policies.
 
+## 当前网站实现文档
+
+- [网站架构与维护接口](documents/website-architecture.md)：路由、布局、内容仓库、日期、URL、搜索、构建和部署边界。
+- [内容创作与维护指南](documents/content-authoring.md)：Bio、Notes、Tips、Projects、Interests、本地数据和 Markdown 模板。
+- [视觉与交互系统](documents/visual-and-interaction-system.md)：设计变量、响应式布局、终端路径、主题、搜索和媒体扩展接口。
+- [网站基础版本实现记录](records/2026-09-03-website-setup.md)：本次验收结果、技术选择、测试、偏差、临时文字和 Git 状态。
+- [GitHub Pages 部署说明](deployment/2026-09-03-github-pages.md)：首次设置、部署过程和排障方式。
+
 ## Documentation lifecycle
 
 ```text

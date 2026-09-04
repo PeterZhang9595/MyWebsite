@@ -1,0 +1,6 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import TerminalPath from '../components/navigation/TerminalPath.astro';
+import { withBase } from '../lib/urls';
+---
+<BaseLayout lang="zh" title="404" description="页面不存在" languageHref="/en/"><main id="main-content" class="content-page"><TerminalPath segments={[{label:'/root',href:withBase('/')},{label:'404'}]} parentHref={withBase('/')}/><h1>页面不存在 / Page not found</h1><p>请求的页面不存在，或内容尚未发布。</p><p>The requested page does not exist or has not been published.</p><p><a href={withBase('/')}>中文首页</a> · <a href={withBase('/en/')}>English home</a></p></main></BaseLayout>

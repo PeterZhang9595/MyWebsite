@@ -1,0 +1,23 @@
+@import 'katex/dist/katex.min.css';
+.content-page { width: min(100%, 760px); margin: 0 auto; }
+.content-header h1 { color: var(--heading); font-size: clamp(2rem, 5vw, 3rem); line-height: 1.15; margin: 0 0 .5rem; }
+.content-description { color: var(--muted); margin: 0 0 1rem; }
+.article-meta { display: flex; flex-wrap: wrap; gap: .4rem 1rem; color: var(--muted); font: .85rem/1.4 var(--ui); margin-bottom: 2rem; }
+.prose { max-width: 72ch; }
+.prose h2, .prose h3 { color: var(--heading); line-height: 1.3; margin-top: 2.3em; }
+.prose img { max-width: 100%; height: auto; }
+.prose pre { position: relative; overflow-x: auto; border: 1px solid var(--divider); border-radius: .45rem; padding: 1rem; }
+[data-theme='dark'] .astro-code, [data-theme='dark'] .astro-code span { color: var(--shiki-dark) !important; background-color: var(--shiki-dark-bg) !important; }
+.code-copy { position: absolute; top: .45rem; right: .45rem; border: 1px solid var(--divider); border-radius: .3rem; padding: .25rem .45rem; color: var(--muted); background: var(--bg); font: .75rem/1.2 var(--ui); cursor: pointer; }
+.prose :not(pre) > code { font-family: var(--mono); color: #a23625; font-size: .9em; }
+:root[data-theme='dark'] .prose :not(pre) > code { color: #ee9182; }
+.prose blockquote { margin: 1.4rem 0; padding: .25rem 0 .25rem 1rem; border-left: 2px solid var(--divider); color: var(--muted); }
+.prose [data-callout] { border: 1px solid var(--divider); border-radius: .45rem; padding: .8rem 1rem; color: var(--text); background: var(--surface); }
+.prose [data-callout]::before { display: block; margin-bottom: .35rem; color: var(--muted); font: 600 .75rem/1.3 var(--ui); text-transform: uppercase; content: attr(data-callout); }
+.prose table { width: 100%; border-collapse: collapse; display: block; overflow-x: auto; }
+.prose th, .prose td { border: 1px solid var(--divider); padding: .55rem .7rem; text-align: left; }
+.prose .katex-display { overflow-x: auto; overflow-y: hidden; padding: .5rem 0; }
+.directory-list { margin: 2rem 0; }
+.directory-list h2 { font-size: 1.25rem; }
+.directory-list ul { padding-left: 1.15rem; }
+.project-facts { display: flex; flex-wrap: wrap; gap: .5rem 1rem; font-family: var(--ui); color: var(--muted); margin-bottom: 1.5rem; }

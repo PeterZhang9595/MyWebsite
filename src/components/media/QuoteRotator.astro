@@ -1,0 +1,16 @@
+---
+import { ui } from '../../i18n';
+import { loadQuotes } from '../../lib/local-data';
+import type { Lang } from '../../lib/types';
+const { lang } = Astro.props as { lang: Lang };
+const quotes = loadQuotes();
+---
+<div class="quote" data-quotes={JSON.stringify(quotes)} data-pagefind-ignore>{quotes[0] ? <><blockquote lang={quotes[0].lang}>“{quotes[0].text}”</blockquote><button type="button" data-next-quote>{ui(lang,'changeQuote')}</button></> : <p>{ui(lang,'empty')}</p>}</div>
+<script is:inline>
+  document.querySelectorAll('.quote[data-quotes]').forEach((root) => {
+    const quotes = JSON.parse(root.getAttribute('data-quotes') || '[]'); if (!quotes.length) return;
+    const block = root.querySelector('blockquote'); let index = Math.max(0, quotes.findIndex((q) => q.id === sessionStorage.getItem('currentQuoteId')));
+    const show = () => { const q=quotes[index]; block.textContent=`“${q.text}”`; block.lang=q.lang; try{sessionStorage.setItem('currentQuoteId',q.id)}catch{} };
+    show(); root.querySelector('[data-next-quote]')?.addEventListener('click',()=>{index=(index+1)%quotes.length;show()});
+  });
+</script>

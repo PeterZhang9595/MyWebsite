@@ -3,7 +3,7 @@
 ## 文档状态
 
 - 日期：2026-09-03
-- 状态：设计已审阅，允许编写实现路线图；尚未授权实现
+- 状态：已按批准设计实现，并于 2026-09-04 通过用户最终验收
 - 范围：个人主页首个可部署版本
 - 原始需求：[2026-09-03-website-setup.md](../requirements/2026-09-03-website-setup.md)
 - 开发流程：[开发策略](../development/strategy.md)
@@ -84,9 +84,11 @@ cd ..
 规则：
 
 - 首页为 `peter@website:/root$`；
+- 所有页面由 `TerminalPath` 渲染的第一行面包屑/提示符都使用贴合文字宽度的极浅纸张黄色背景（浅色固定为 `#fff9df`）；深色主题使用低饱和暗暖色 `#302c22`；
 - 已经过的每一级路径可以点击；
 - 当前页面名称不可点击；
 - `cd ..` 作为第二行的父级返回命令；
+- `cd ..` 不使用提示符的黄色背景；
 - 显示路径可以使用中文，真实 URL 仍使用小写英文 ASCII slug；
 - 界面不显示 GitHub Pages 的 `/MyWebsite` 基础路径；
 - 长路径在窄屏安全换行；
@@ -174,6 +176,7 @@ serif
 - 实现授权后使用用户提供的 `avatar.jpg`；
 - 头像居中显示为圆形，带细中性边框和内部留白；
 - `Peter Zhang` 位于头像下方，是资料区最强文字层级；
+- 姓名字号比首轮预览更克制，不应压过头像和后续 Bio；
 - 下一行并列所在地与 GitHub 两个图标化入口；
 - 所在地为 `China / Beijing`；
 - GitHub 地址为 <https://github.com/PeterZhang9595>；
@@ -211,7 +214,7 @@ Notes、Projects、Interests 采用编辑式目录入口：较大标题在左，
 
 ### 4.8 右栏：留白画廊
 
-从上到下为随机句子、插画/视频主视觉、轻微叠在插画下缘的紧凑播放器。
+从上到下为随机句子、插画/视频主视觉、轻微叠在插画下缘的紧凑播放器。整个右栏内容相对顶部工具栏下移，保留明确呼吸空间。
 
 随机句子：
 
@@ -220,6 +223,7 @@ Notes、Projects、Interests 采用编辑式目录入口：较大标题在左，
 - 可包含 `text`、`author`、`source` 和 `lang`；
 - 当前句子通过 `sessionStorage` 在标签页内保持；
 - 点击后从本地数据更换；
+- 中文操作文字为“换一个”，放在实际句子的右下方；
 - 不请求外部服务。
 
 插画与视频：
@@ -407,7 +411,7 @@ base: /MyWebsite
 
 ## 14. 图标与客户端技术
 
-- 使用 `lucide-astro`，构建为静态 SVG，只导入使用的图标；
+- 使用 `@lucide/astro`，构建为静态 SVG，只导入使用的图标；
 - 纯图标按钮有无障碍名称；
 - 使用 Astro 组件和少量原生 TypeScript；
 - 不引入 React、Vue、全局状态或客户端路由；
@@ -439,9 +443,11 @@ docs/                       项目文档
 
 使用现有头像、姓名、所在地和 GitHub，不编造其他个人内容。缺少内容时显示本地化空状态；缺少 Long Bio 时隐藏按钮；三个本地数据文件可以为空；公开目录不创建示例文章，测试示例只在 `tests/fixtures/`。
 
+实现开始后，用户明确批准在主页加入少量由助手编写的临时文字，用于验证中英文、长短段落和列表排版。这些文字不得被描述为用户的真实经历或正式观点，必须集中放在易替换的内容/数据文件中，并在交付验收时逐项列出文件位置和完整文本，由用户决定保留、修改或删除。
+
 ## 17. 依赖边界
 
-直接依赖包括 Astro、MDX、官方 Markdown 管线、Sitemap、Pagefind、KaTeX 管线、Lucide、Sharp、Astro Check、TypeScript、Node 类型、Vitest、Playwright 和 axe-core。全部精确锁定。未经授权不得添加 Tailwind、React、Vue、组件库、状态管理、完整 i18n 框架、Pagefind 封装、MathJax 或无关工具。
+直接依赖包括 Astro、MDX、官方 Markdown 管线、Sitemap、Pagefind、KaTeX 管线、Lucide、Sharp、Astro Check、TypeScript、Node 类型、Vitest、Playwright 和 axe-core。全部精确锁定。实现验证发现 Astro 7.3.0 的 Image 插件存在未公开内部模块导入回归，用户批准锁定到无该回归的 Astro 7.2.10。未经授权不得添加 Tailwind、React、Vue、组件库、状态管理、完整 i18n 框架、Pagefind 封装、MathJax 或无关工具。
 
 `sharp`、`@types/node` 和 `@astrojs/markdown-remark` 是设计审阅后经用户明确批准增加的支撑依赖。
 

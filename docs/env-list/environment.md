@@ -2,20 +2,22 @@
 
 ## Status
 
-- Last verified: 2026-09-03
+- Last verified: 2026-09-04
 - Development platform: Windows 11 (`10.0.26200.0`)
 - Shell used for verification: PowerShell `7.6.4`
-- Environment scope: runtime and package-management toolchain only
+- Environment scope: runtime、包管理器、网站依赖与自动化测试工具链
 
 This document is the current source of truth for the reproducible development
-environment. It intentionally does not describe Astro packages or website test
-dependencies because those belong to the separate website setup requirement.
+environment. 网站基础版本的依赖和验证命令已经在本文后半部分补充，并与
+`package.json`、`pnpm-lock.yaml` 和 `pnpm-workspace.yaml` 保持一致。
 
 ## Related documents
 
 - [Source requirement](../requirements/2026-09-03-environment-setup.md)
 - [Implementation roadmap](../implement-roadmap/2026-09-03-environment-setup.md)
 - [Testing strategy](../testing-strategies/2026-09-03-testing-strategy.md)
+- [网站架构与维护接口](../documents/website-architecture.md)
+- [网站基础版本实现记录](../records/2026-09-03-website-setup.md)
 
 ## Required toolchain
 
@@ -37,8 +39,9 @@ Existing browsers are sufficient for future manual rendering checks:
 | Google Chrome | `152.0.7977.65` | Primary manual rendering check |
 | Microsoft Edge | `152.0.4191.53` | Secondary Chromium compatibility check |
 
-Browser versions are observations rather than project locks. Browser automation
-runtimes are not installed by this requirement.
+Browser versions are observations rather than project locks. 网站基础版本后续已经安装
+Playwright Chromium、Firefox 和 WebKit 运行时；Chromium 与 WebKit 在当前主机可运行，
+Firefox 启动受到下文记录的主机限制。
 
 ## Installation layout
 
@@ -146,21 +149,12 @@ Do not leave Node.js pinned indefinitely to an unsupported patch release. Exact
 version recording makes upgrades reviewable; it is not a reason to avoid security
 updates.
 
-## Deferred environment
+## 当前不需要的环境
 
-The following are intentionally deferred to the website setup requirement:
-
-- Astro and Astro integrations;
-- TypeScript project configuration;
-- `package.json` and `pnpm-lock.yaml`;
-- formatting and linting tools;
-- Vitest and test libraries;
-- Playwright and browser automation binaries;
-- Astro pages, components, layouts, content, and styles;
-- GitHub Pages build and deployment configuration.
-
-No C++ compiler, Python build environment, Docker runtime, database, or other
-native toolchain is required at this stage.
+网站基础版本不需要 C++ 编译器、Python 构建环境、Docker、数据库或其它服务端运行时。
+当前也没有格式化器或独立 lint 工具；代码有效性由 Astro Check、TypeScript、Vitest、
+Playwright 和生产构建共同验证。以后新增原生依赖、服务端能力或格式化工具时，需要按
+开发策略单独评估并更新本文档。
 
 ## Secrets and environment variables
 
@@ -186,3 +180,23 @@ manifest. Subsequent registry inspection showed that `12.3.1` was tagged
 correctly selected `11.25.0` as its Known Good Release outside a project with a
 `packageManager` declaration. The user approved adopting `11.25.0`, and the
 Corepack default and both pnpm command entry points were verified at that version.
+
+## 网站项目依赖（2026-09-04 更新）
+
+网站基础版本已经初始化。直接运行依赖为 Astro `7.2.10`、`@astrojs/mdx` `8.0.0`、`@astrojs/markdown-remark` `7.3.0`、`@astrojs/sitemap` `3.7.4`、KaTeX 管线、`@lucide/astro` `1.40.0` 和 Sharp `0.35.4`。开发依赖包括 Astro Check、TypeScript `6.0.3`、Node 24 类型、Pagefind `1.5.2`、Vitest `4.1.11`、Playwright `1.62.1` 与 axe-core Playwright `4.13.0`。
+
+Astro 原计划使用 `7.3.0`，但该版本的 Image 插件会导入未公开的 `astro/_internal/logger`，导致生产构建失败。用户明确批准回退并精确锁定到不存在该回归的 `7.2.10`。
+
+pnpm 11.25 的依赖构建许可保存在 `pnpm-workspace.yaml`，允许 `esbuild` 和 `sharp` 执行必要安装脚本。当前 Codex 进程可能仍需要临时刷新 PATH，并设置 `ASTRO_TELEMETRY_DISABLED=1` 以避免沙箱外写入。
+
+项目验证命令：
+
+```powershell
+pnpm run check
+pnpm run test:unit
+pnpm run build
+pnpm run test:e2e
+pnpm run test:e2e:webkit
+```
+
+Firefox Playwright 运行时已下载，但在当前 Windows 主机上启动时报 `spawn UNKNOWN`；Chromium 与 WebKit 可正常运行。该限制不影响 GitHub Actions Ubuntu 环境继续尝试 Chromium 验证。

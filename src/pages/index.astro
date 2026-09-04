@@ -1,0 +1,45 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import HomeLayout from '../layouts/HomeLayout.astro';
+import TerminalPath from '../components/navigation/TerminalPath.astro';
+import ProfileHeader from '../components/home/ProfileHeader.astro';
+import BioToggle from '../components/home/BioToggle.astro';
+import SectionEntry from '../components/home/SectionEntry.astro';
+import PersonalMedia from '../components/media/PersonalMedia.astro';
+import { loadRecentFocus } from '../lib/local-data';
+import { contentPath, localDataHref, withBase } from '../lib/urls';
+import { ui } from '../i18n';
+import { siteConfig } from '../site.config';
+import { buildAlternates } from '../lib/seo';
+
+const lang = 'zh' as const;
+const bios = (await getCollection('bioZh')).filter((entry) => !entry.data.draft);
+const defaultBio = bios.find((entry) => entry.data.variant === 'default');
+const longBio = bios.find((entry) => entry.data.variant === 'long');
+const DefaultBio = defaultBio ? (await render(defaultBio)).Content : null;
+const LongBio = longBio ? (await render(longBio)).Content : null;
+const tips = (await getCollection('tipsZh')).filter((entry) => !entry.data.draft).sort((a,b) => a.data.order-b.data.order);
+const focus = loadRecentFocus().sort((a,b) => a.order-b.order);
+---
+<BaseLayout lang={lang} languageHref="/en/" alternates={buildAlternates('/','/en/')}>
+  <HomeLayout>
+    <TerminalPath segments={[{ label: '/root' }]} />
+    <ProfileHeader />
+    <BioToggle lang={lang} hasDefault={Boolean(DefaultBio)} hasLong={Boolean(LongBio)}>
+      {DefaultBio && <DefaultBio slot="default" />}
+      {LongBio && <LongBio slot="long" />}
+    </BioToggle>
+    <div class="split-index">
+      <section><h2>{ui(lang,'recentFocus')}</h2>{focus.length ? <ul class="index-list">{focus.map((item) => <li>{item.url ? <a href={localDataHref(item.url)}>{item.title[lang]}</a> : item.title[lang]}</li>)}</ul> : <p>{ui(lang,'empty')}</p>}</section>
+      <section><h2>{ui(lang,'tips')}</h2>{tips.length ? <ul class="index-list">{tips.map((tip) => <li><a href={withBase(contentPath(lang,tip.data.slug))}>{tip.data.title}</a></li>)}</ul> : <p>{ui(lang,'empty')}</p>}</section>
+    </div>
+    <nav aria-label="主要栏目">
+      <SectionEntry href={withBase('/notes/')} title={ui(lang,'notes')} description="课程记录、技术推导与持续整理的学习档案。" action="进入 →" />
+      <SectionEntry href={withBase('/projects/')} title={ui(lang,'projects')} description="长期项目、实验实现与开源工作的完整记录。" action="进入 →" />
+      <SectionEntry href={withBase('/interests/')} title={ui(lang,'interests')} description="音乐、游戏以及工作之外值得保留的兴趣。" action="进入 →" />
+    </nav>
+    <footer class="copyright">© {new Date().getFullYear()} {siteConfig.copyrightOwner}</footer>
+    <PersonalMedia slot="aside" lang={lang} />
+  </HomeLayout>
+</BaseLayout>

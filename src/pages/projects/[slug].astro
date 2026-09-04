@@ -1,0 +1,7 @@
+---
+import ContentItemPage from '../../components/pages/ContentItemPage.astro';
+import { loadPublicContent } from '../../lib/content-repository';
+export async function getStaticPaths(){return (await loadPublicContent('projects','zh')).filter((item)=>item.data.slug!=='projects').map((item)=>({params:{slug:item.data.slug.slice('projects/'.length)},props:{item}}));}
+const { item } = Astro.props;
+---
+<ContentItemPage lang="zh" section="projects" {item}/>

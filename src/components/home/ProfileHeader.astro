@@ -1,0 +1,12 @@
+---
+import { Image } from 'astro:assets';
+import { MapPin } from '@lucide/astro';
+import GitHubMark from '../icons/GitHubMark.astro';
+import avatar from '../../assets/profile/avatar.jpg';
+import { siteConfig } from '../../site.config';
+---
+<header class="profile" data-pagefind-ignore>
+  <Image src={avatar} alt="Peter Zhang" widths={[112,152,224,304]} sizes="(max-width: 560px) 112px, 152px" />
+  <h1>{siteConfig.name}</h1>
+  <div class="profile-meta"><span><MapPin size={19}/>{siteConfig.location}</span><a href={siteConfig.githubUrl} target="_blank" rel="noreferrer"><GitHubMark size={19}/>GitHub</a></div>
+</header>
