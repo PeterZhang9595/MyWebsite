@@ -193,7 +193,7 @@ pnpm run test:all
 
 ## 13. 当前限制
 
-- GitHub Pages workflow 已写入仓库，但尚未提交、合并、推送，因此线上还没有部署本版本；
+- GitHub Pages 已于 2026-09-04 成功部署，当前公开地址为 <https://peterzhang9595.github.io/MyWebsite/>；
 - 当前 Windows 主机的 Playwright Firefox 启动会返回 `spawn UNKNOWN`；Chromium 和 WebKit 已通过，CI 的 Ubuntu 环境仍可继续覆盖 Chromium；
 - 插画、视频和音乐使用可扩展外壳，目前没有正式媒体；
 - 首页 Bio、Tips、Recent Focus、随机句子和栏目说明仍包含已明确标注的助手临时排版文字，替换方式见[内容创作指南](content-authoring.md)。

@@ -170,3 +170,21 @@ C:\WorkSpace\website\.worktrees\website-setup
 ```
 
 分支为 `codex/website-setup`，基于 `main` 的 `254652b`。助手没有执行 `git add`、commit、merge 或 push。下一步需要由用户选择本地合并、推送创建 Pull Request，或暂时保留分支；只有提交并推送到 `main` 且 GitHub Pages Source 选择 GitHub Actions 后，线上站点才会部署。
+
+## 10. 部署完成补记
+
+2026-09-04，用户选择将功能分支本地合并到 `main`。实现提交为：
+
+```text
+ce0fded feat: build bilingual Astro personal website
+```
+
+合并后的 `main` 完整运行 `pnpm run test:all`，Astro 检查为 0 问题、Vitest 34/34、生产构建 13 页、Chromium 21/21、WebKit 21/21。随后用户提交 `.gitignore` 调整，远端实际部署提交为 `370578480d431cfcba06e8ff2520fb0ee194bfe9`。
+
+首次 Pages 运行中的代码 checkout、依赖安装、检查、测试和生产构建全部成功，但 `actions/configure-pages` 因仓库尚未启用 Pages 而失败。用户在 **Settings → Pages** 将 Source 设为 **GitHub Actions** 后重新运行，部署任务第 2 次尝试成功：
+
+- [CI 成功运行](https://github.com/PeterZhang9595/MyWebsite/actions/runs/33824187900)
+- [Pages 成功运行](https://github.com/PeterZhang9595/MyWebsite/actions/runs/33824187975)
+- [线上网站](https://peterzhang9595.github.io/MyWebsite/)
+
+线上检查确认中文首页、英文首页、Tip 详情、Pagefind 脚本和 `robots.txt` 均返回 HTTP 200；页面 canonical 正确包含 `/MyWebsite`。至此，本需求的本地实现、验收、文档、Git 集成和首次线上部署均已完成。
