@@ -9,3 +9,4 @@ tests/artifacts/**
 !tests/artifacts/.gitignore
 .DS_Store
 Thumbs.db
+.pnpm-store/
