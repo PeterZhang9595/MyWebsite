@@ -1,0 +1,19 @@
+---
+/**
+ * 横滑卡片轨道：拖拽 + 滚轮横向滚动，零依赖。
+ *
+ * - 结构：`overflow-x: auto` 的滚动容器，子元素为卡片。
+ * - 行为由 `src/styles/interests.css` 里的脚本驱动（指针拖拽 + 垂直滚轮转横向）。
+ * - 触屏沿用原生惯性滚动，脚本不干预。
+ */
+interface Props {
+  label: string;
+}
+const { label } = Astro.props;
+---
+
+<div class="card-rail" data-card-rail>
+  <div class="card-rail__track" role="list" aria-label={label}>
+    <slot />
+  </div>
+</div>

@@ -1,0 +1,112 @@
+---
+/**
+ * Interests 二级子页：整页糖果粉紫渐变背景 + justified 图片墙。
+ *
+ * 图片墙使用 justified 算法排布：同一行的图片等高、整行铺满容器宽，
+ * 且**不改变图片原始宽高比**。每个图片下方是图注（标题，无时间）。
+ * 点击图片放大 → 翻面显示正文 → 再点复原。
+ *
+ * 排版在构建期完成（SSR），页面加载后零重排。
+ */
+import ContentLayout from '../../layouts/ContentLayout.astro';
+import FlipCard from '../content/FlipCard.astro';
+import { contentSegments } from '../../lib/content-navigation';
+import { sectionPath } from '../../i18n';
+import { withBase } from '../../lib/urls';
+import { frameFor } from '../../lib/interests-frames';
+import { justify, ratioFromSize } from '../../lib/justified';
+import type { ContentItem } from '../../lib/content-repository';
+import type { Lang } from '../../lib/types';
+import '../../styles/interests.css';
+
+interface Props { lang: Lang; item: ContentItem }
+const { lang, item } = Astro.props;
+
+const title = item.data.title;
+const description = item.data.description;
+const other = lang === 'zh' ? 'en' : 'zh';
+const segments = contentSegments(lang, 'interests', item.data.slug, title);
+const cards = ((item.data as any)?.cards ?? []) as Array<{
+  image?: any; title: string; subtitle?: string; body: string; alt?: string; frame?: string;
+}>;
+const count = cards.length;
+const countLabel = lang === 'zh'
+  ? `${count} 张图片`
+  : `${count} ${count === 1 ? 'image' : 'images'}`;
+
+/**
+ * 构建期算好 justified 布局。
+ *
+ * 宽高比来源：有图取 ImageMetadata 的真实像素尺寸；
+ * 无图卡片没有尺寸信息，用 4:3 兜底参与计算（占位块也按同一比例渲染，视觉自洽）。
+ */
+const LAYOUT_WIDTH = 1440;
+const LAYOUT_GAP = 18;
+const TARGET_HEIGHT = 260;
+
+const rows = justify(
+  cards.map((card, index) => ({
+    ratio: ratioFromSize(card.image?.width, card.image?.height),
+    index,
+  })),
+  LAYOUT_WIDTH,
+  LAYOUT_GAP,
+  TARGET_HEIGHT,
+);
+
+const scriptLabels = JSON.stringify({
+  dialog: lang === 'zh' ? '放大查看' : 'Enlarged view',
+  close: lang === 'zh' ? '关闭' : 'Close',
+  zoomHint: lang === 'zh' ? '再点一次翻开 · Esc 关闭' : 'Click again to flip · Esc to close',
+  closeHint: lang === 'zh' ? '再点一次关闭 · Esc 关闭' : 'Click again to close · Esc to close',
+  scroll: lang === 'zh' ? '说明文字，可上下滚动' : 'Description, scrollable',
+});
+---
+
+<ContentLayout
+  {lang}
+  {title}
+  {description}
+  languageHref={sectionPath(other, 'interests')}
+  canonicalPath={`${sectionPath(lang, 'interests')}${item.data.slug.slice('interests/'.length)}/`}
+  segments={segments}
+  parentHref={withBase(sectionPath(lang, 'interests'))}
+  plainPath
+  wide
+>
+  <div class="interests-category" data-interests-root data-labels={scriptLabels}>
+    <div class="interests-gradient" aria-hidden="true"></div>
+    <div class="interests-category__body">
+      {count > 0 ? (
+        <>
+          <p class="interests-category__count">{countLabel}</p>
+          <div class="interests-wall" data-justified-wall>
+            {rows.map((row) => (
+              <div class="interests-wall__row" style={`--row-h: ${row.height.toFixed(2)}px;`}>
+                {row.items.map((slot) => {
+                  const card = cards[slot.index];
+                  return (
+                    <FlipCard
+                      image={card.image}
+                      title={card.title}
+                      subtitle={card.subtitle}
+                      body={card.body}
+                      alt={card.alt}
+                      frame={card.frame ?? frameFor(slot.index)}
+                      ratio={slot.ratio}
+                      width={slot.width}
+                    />
+                  );
+                })}
+              </div>
+            ))}
+          </div>
+        </>
+      ) : (
+        <p class="interests-category__empty">{lang === 'zh' ? '内容整理中' : 'Content pending'}</p>
+      )}
+    </div>
+  </div>
+</ContentLayout>
+
+<script is:inline src={withBase('/scripts/interests.js')}></script>

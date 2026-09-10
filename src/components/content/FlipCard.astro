@@ -1,0 +1,75 @@
+---
+/**
+ * 通用翻面卡牌：点击放大 → 再点击翻面 → 再点击复原。
+ *
+ * 三段式交互由 `public/scripts/interests.js` 统一驱动，本组件只负责结构：
+ * 正面（图片或 CSS 占位）+ 背面信息，以及供脚本读取的 data 属性。
+ *
+ * 两种用途：
+ * - `variant="hero"`：主页双图，16:9 大图。
+ * - 默认（子页图片墙）：由 justified 算法给出本张图的渲染宽高，
+ *   通过内联 `width` / `height` 固定，从而**保持图片原始宽高比**。
+ *
+ * 无障碍：卡片本身是 button，可键盘聚焦；Enter/Space 触发，Esc 还原。
+ * prefers-reduced-motion 下由 CSS 关闭装饰动画（翻面作为内容切换保留）。
+ */
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
+interface Props {
+  image?: ImageMetadata;
+  title: string;
+  subtitle?: string;
+  body: string;
+  frame: string;
+  /** 图片替代文本；省略时回退为标题。仅在有图时有意义。 */
+  alt?: string;
+  variant?: 'card' | 'hero';
+  /** justified 算出的宽高比（宽 / 高）。省略时由 CSS 决定。 */
+  ratio?: number;
+  /** justified 算出的渲染宽度（px）。高度由 ratio 推导。 */
+  width?: number;
+}
+
+const {
+  image, title, subtitle, body, frame, alt, variant = 'card',
+  ratio, width,
+} = Astro.props;
+const isHero = variant === 'hero';
+const imageAlt = alt ?? title;
+const isSized = !isHero && typeof width === 'number' && typeof ratio === 'number';
+const style = [
+  `--frame: ${frame};`,
+  // 宽度由算法给出；高度交给 .flip-card__front 的 aspect-ratio 推导，
+  // 这样图注可以自然排在图片下方，不会因为整卡固定高度而被压缩。
+  isSized ? `width: ${width.toFixed(2)}px;` : '',
+  typeof ratio === 'number' ? `--ratio: ${ratio.toFixed(6)};` : '',
+].filter(Boolean).join(' ');
+---
+
+<button
+  type="button"
+  class:list={['flip-card', isHero && 'flip-card--hero', isSized && 'flip-card--sized']}
+  style={style}
+  data-title={title}
+  data-body={body}
+  data-flip-title={title}
+  data-alt={imageAlt}
+  aria-label={`${title}：点击放大查看`}
+>
+  <span class="flip-card__front">
+    {image ? (
+      <Image class="flip-card__image" src={image} alt={imageAlt} loading="lazy" />
+    ) : (
+      <span class="flip-card__placeholder" aria-hidden="true">
+        <span class="flip-card__placeholder-mark">{title.slice(0, 1)}</span>
+      </span>
+    )}
+  </span>
+  {!isHero && (
+    <span class="flip-card__caption">
+      <span class="flip-card__title">{title}</span>
+      {subtitle && <span class="flip-card__subtitle">{subtitle}</span>}
+    </span>
+  )}
+</button>

@@ -1,0 +1,93 @@
+---
+/**
+ * Interests 一级主页：满宽布局。
+ * 上半为两张可点击大图（点击放大 → 翻面），下半为「左固定卡 + 右横滑轨道」。
+ */
+import ContentLayout from '../../layouts/ContentLayout.astro';
+import FlipCard from '../content/FlipCard.astro';
+import CardRail from '../content/CardRail.astro';
+import { directChildren, loadPublicContent } from '../../lib/content-repository';
+import { contentSegments } from '../../lib/content-navigation';
+import { sectionPath, ui } from '../../i18n';
+import { withBase } from '../../lib/urls';
+import { buildAlternates } from '../../lib/seo';
+import { FRAME_PALETTE } from '../../lib/interests-frames';
+import type { Lang } from '../../lib/types';
+import '../../styles/interests.css';
+
+const { lang } = Astro.props as { lang: Lang };
+const items = await loadPublicContent('interests', lang);
+const root = items.find((item) => item.data.slug === 'interests' && item.isDirectory);
+const children = directChildren(items, 'interests');
+const categories = children.directories;
+const title = root?.data.title ?? ui(lang, 'interests');
+const description = root?.data.description ?? ui(lang, 'empty');
+const other = lang === 'zh' ? 'en' : 'zh';
+const heroImages = (root?.data as any)?.heroImages ?? [];
+const railLabel = lang === 'zh' ? '乱七八糟的各种东西' : 'All sorts of things';
+const railHint = lang === 'zh' ? '左右拖动或滚动查看' : 'Drag or scroll sideways';
+// 左引导卡保留引导文案并作为卡组首张；分区不再设可视标题（避免与卡片文案重复），
+// 改为给 section 挂 aria-label，保证地标仍可被读屏识别。
+const leadText = lang === 'zh' ? '乱七八糟的东西' : 'All sorts of stuff';
+const scriptLabels = JSON.stringify({
+  dialog: lang === 'zh' ? '放大查看' : 'Enlarged view',
+  close: lang === 'zh' ? '关闭' : 'Close',
+  zoomHint: lang === 'zh' ? '再点一次翻开 · Esc 关闭' : 'Click again to flip · Esc to close',
+  closeHint: lang === 'zh' ? '再点一次关闭 · Esc 关闭' : 'Click again to close · Esc to close',
+});
+---
+
+<ContentLayout {lang} {title} {description} languageHref={sectionPath(other,'interests')} canonicalPath={sectionPath(lang,'interests')} alternates={buildAlternates(sectionPath('zh','interests'),sectionPath('en','interests'))} segments={contentSegments(lang,'interests','interests',title)} parentHref={withBase(lang==='zh'?'/':'/en/')} wide>
+  <div class="interests-home" data-interests-root data-labels={scriptLabels}>
+    {heroImages.length > 0 && (
+      <div class="interests-hero-pair" data-hero-pair>
+        {heroImages.map((hero: any, index: number) => (
+          <FlipCard
+            image={hero.image}
+            title={hero.title}
+            body={hero.body}
+            alt={hero.alt}
+            frame={FRAME_PALETTE[index % FRAME_PALETTE.length]}
+            variant="hero"
+          />
+        ))}
+      </div>
+    )}
+
+    <section class="interests-rail" aria-label={railLabel}>
+      <p class="interests-rail__hint">{railHint}</p>
+      <CardRail label={railLabel}>
+        <div class="interests-rail__lead" aria-hidden="true">
+          <span class="interests-rail__lead-text">{leadText}</span>
+        </div>
+        {categories.map((category, index) => {
+          const slug = category.data.slug.slice('interests/'.length);
+          const count = (category.data as any)?.cards?.length ?? 0;
+          const frame = FRAME_PALETTE[index % FRAME_PALETTE.length];
+          return (
+            <a
+              class="rail-card"
+              href={withBase(`${sectionPath(lang, 'interests')}${slug}/`)}
+              style={`--frame: ${frame}; --i: ${index};`}
+            >
+              {/* 色块标识：只保留分类配色，不承载文字（标题与计数在下方 body 内） */}
+              <span class="rail-card__frame" aria-hidden="true"></span>
+              <span class="rail-card__body">
+                <span class="rail-card__title">{category.data.title}</span>
+                <span class="rail-card__meta">
+                  {count > 0
+                    ? lang === 'zh'
+                      ? `${count} 张卡`
+                      : `${count} ${count === 1 ? 'card' : 'cards'}`
+                    : ''}
+                </span>
+              </span>
+            </a>
+          );
+        })}
+      </CardRail>
+    </section>
+  </div>
+</ContentLayout>
+
+<script is:inline src={withBase('/scripts/interests.js')}></script>

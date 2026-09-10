@@ -47,6 +47,33 @@ export function createProjectSchema(image: ImageSchemaFactory) {
 export function createInterestsSchema(image: ImageSchemaFactory) {
   return createCommonContentSchema(image).extend({
     order: z.number().int().optional(),
+    // 一级主页：最多两张可点击大图（点击放大 → 翻面显示介绍）
+    // image 可选：未配图时组件渲染 CSS 占位块，便于先搭版式、后续再补图。
+    heroImages: z
+      .array(
+        z.object({
+          image: image().optional(),
+          title: z.string().trim().min(1),
+          body: z.string().trim().min(1),
+        }),
+      )
+      .max(2)
+      .default([]),
+    // 二级子页：卡牌墙（正面图 + 背面文字 + 可选帧色）
+    cards: z
+      .array(
+        z.object({
+          image: image().optional(),
+          title: z.string().trim().min(1),
+          subtitle: z.string().trim().optional(),
+          body: z.string().trim().min(1),
+          frame: z
+            .string()
+            .regex(/^#[0-9a-fA-F]{6}$/)
+            .optional(),
+        }),
+      )
+      .default([]),
   });
 }
 

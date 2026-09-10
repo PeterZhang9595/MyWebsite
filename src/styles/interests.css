@@ -1,0 +1,235 @@
+/* Interests 板块样式：主页双图 + 重叠卡片轨道 + 子页 justified 图片墙。
+   全部零依赖纯 CSS；颜色由卡片上的 --frame 变量派生。
+
+   子页重要约束：
+   - 整页渐变用 position:fixed + z-index:-1，铺满视口且不参与内容层叠；
+   - 面包屑去黄底 / 去边框由 main[data-plain-path] 命中（见文件末尾）。 */
+
+/* ---------- 主页 ---------- */
+.interests-home { display: block; }
+.interests-hero-pair { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(.75rem, 1.6vw, 1.25rem); margin-bottom: clamp(2rem, 4vw, 3.25rem); }
+
+/* ---------- 通用翻面卡 ---------- */
+.flip-card {
+  position: relative; display: block; width: 100%; padding: 0; border: 0; margin: 0;
+  background: transparent; font: inherit; color: inherit; text-align: left; cursor: pointer;
+}
+.flip-card__front {
+  position: relative; display: block; overflow: hidden; aspect-ratio: 3 / 4;
+  border-radius: .6rem; background: color-mix(in srgb, var(--frame) 8%, var(--surface));
+}
+.flip-card--hero .flip-card__front { aspect-ratio: 16 / 9; border-radius: .85rem; }
+/* justified 图片墙：图片区尺寸由算法给出的 width/height 固定，宽高比即原始比例 */
+.flip-card--sized { display: flex; flex-direction: column; }
+.flip-card--sized .flip-card__front {
+  flex: 0 0 auto; aspect-ratio: auto;
+  /* 图片区高度由算法给出的 height 决定；宽度走 100%（等于整卡宽度） */
+  height: auto;
+  position: relative;
+  aspect-ratio: var(--ratio);
+}
+.flip-card--sized .flip-card__image { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+.flip-card__placeholder {
+  position: absolute; inset: 0; display: grid; place-items: center;
+  background:
+    radial-gradient(120% 100% at 20% 10%, color-mix(in srgb, var(--frame) 46%, transparent) 0%, transparent 60%),
+    radial-gradient(110% 110% at 90% 90%, color-mix(in srgb, var(--frame) 32%, transparent) 0%, transparent 62%),
+    linear-gradient(160deg, color-mix(in srgb, var(--frame) 14%, var(--bg)) 0%, color-mix(in srgb, var(--frame) 5%, var(--bg)) 100%);
+}
+.flip-card__placeholder-mark {
+  font-family: var(--ui); font-size: clamp(2rem, 4vw, 3.25rem); font-weight: 500;
+  color: color-mix(in srgb, var(--frame) 70%, var(--text)); opacity: .5; user-select: none;
+}
+.flip-card__caption { display: flex; flex-direction: column; gap: .1rem; padding: .6rem .2rem 0; }
+.flip-card__title { color: var(--heading); font-size: 1rem; line-height: 1.35; }
+.flip-card__subtitle { color: var(--muted); font-size: .82rem; font-family: var(--ui); }
+
+/* ---------- 子页图片墙（justified） ---------- */
+.interests-wall { display: flex; flex-direction: column; gap: clamp(.9rem, 1.8vw, 1.5rem); }
+.interests-wall__row { display: flex; align-items: flex-start; gap: clamp(.6rem, 1.2vw, 1.15rem); }
+
+/* 墙上的卡：图片 + 图注，无粗框；帧色转为图注左侧色条 */
+.interests-wall .flip-card { background: transparent; }
+.interests-wall .flip-card__caption {
+  margin-top: .5rem; padding-left: .55rem;
+  border-left: 3px solid var(--frame);
+}
+.interests-wall .flip-card__front { border-radius: .5rem; }
+/* 聚焦导视：hover 当前图轻微抬起，其余轻微灰化（大图上不做重度滤镜） */
+.interests-wall:hover .flip-card:not(:hover) { filter: grayscale(.5) brightness(.94); }
+.interests-wall .flip-card:hover { transform: translateY(-3px); }
+.interests-wall .flip-card:hover .flip-card__front { box-shadow: 0 8px 22px color-mix(in srgb, var(--frame) 20%, transparent); }
+.flip-card:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; }
+
+/* ---------- 重叠卡片轨道 ---------- */
+.interests-rail { margin-top: 1rem; }
+.interests-rail__hint { color: var(--muted); font-size: .82rem; font-family: var(--ui); margin: 0 0 .9rem; text-align: right; }
+.card-rail { position: relative; }
+.card-rail__track {
+  display: flex; align-items: flex-end;
+  overflow-x: auto; overscroll-behavior-x: contain;
+  padding-bottom: .6rem; scrollbar-width: thin;
+}
+.card-rail__track::-webkit-scrollbar { height: 6px; }
+.card-rail__track::-webkit-scrollbar-thumb { background: var(--divider); border-radius: 3px; }
+.card-rail[data-dragging] .card-rail__track { cursor: grabbing; }
+
+/* 左引导卡：3:4 竖版 + 细渐变色边框（渐变层 → 实底覆盖 → 内容浮顶）。
+   与右侧卡组之间留出固定间隔，形成「左右分区」。 */
+.interests-rail__lead {
+  flex: 0 0 auto; position: relative;
+  width: clamp(190px, 22vw, 250px); aspect-ratio: 3 / 4;
+  margin-right: clamp(1.5rem, 4vw, 3.5rem);
+  display: flex; align-items: flex-end; padding: 3px;
+  border-radius: .85rem;
+}
+.interests-rail__lead::before {
+  content: ''; position: absolute; inset: 0; z-index: 1; border-radius: inherit;
+  background: linear-gradient(135deg, #ff7a18 0%, #af002d 41%, #319197 76%);
+}
+.interests-rail__lead::after {
+  content: ''; position: absolute; inset: 3px; z-index: 2; border-radius: .7rem;
+  background: color-mix(in srgb, var(--surface) 88%, var(--bg));
+}
+.interests-rail__lead-text {
+  position: relative; z-index: 3; color: var(--heading);
+  font-size: 1.08rem; line-height: 1.45; padding: .35rem .2rem 1rem 1rem;
+}
+
+/* 右侧卡组：1:1 正方形，每张**右侧** 25% 被后一张遮盖
+   （z-index 随索引递增，靠右的卡层级更高 —— 右压左）。
+   因此每张卡的可见区是「左侧 75%」，内容必须避开被盖住的**右侧** 25%，
+   否则标题会被后一张压掉尾字；色块贴左上角也要求左侧不留避让边距。
+   --card-w 与卡片宽度使用同一条公式，保证「遮盖 25%」在任何视口都精确成立。 */
+.rail-card {
+  --card-w: clamp(210px, 23.8vw, 273px);
+  --overlap: 0.25;
+  flex: 0 0 auto; position: relative;
+  width: var(--card-w);
+  aspect-ratio: 1 / 1;
+  display: flex; flex-direction: column; justify-content: space-between;
+  border-radius: .8rem; text-decoration: none;
+  border: 1px solid var(--divider);
+  background: color-mix(in srgb, var(--bg) 92%, transparent);
+  /* 右卡压左卡：z-index 随索引递增 */
+  z-index: calc(100 + var(--i, 0));
+  transition: transform .24s ease, border-color .2s ease, box-shadow .24s ease;
+}
+.rail-card + .rail-card { margin-left: calc(var(--card-w) * -1 * var(--overlap)); }
+
+/* 内容整体让开右侧被遮盖的 25%：留出遮盖宽度再加一点呼吸感。
+   左内边距固定为一点呼吸感，使色块与标题真正贴住左上角。 */
+.rail-card__frame,
+.rail-card__body {
+  margin-right: calc(var(--card-w) * var(--overlap) + .35rem);
+  margin-left: .85rem;
+}
+
+/* 悬浮突出：当前卡抬起，其**后方**的卡整体右推让位（把遮住当前卡右侧 25% 的那一段挪开，
+   使标题完整可见）。现在是右卡压左卡，所以要动的是索引更大的兄弟 —— 用 `~` 命中。 */
+.rail-card:hover {
+  transform: translateY(-12px);
+  border-color: color-mix(in srgb, var(--frame) 60%, var(--divider));
+  box-shadow: 0 12px 28px color-mix(in srgb, var(--frame) 24%, transparent);
+}
+.rail-card:hover ~ .rail-card { transform: translateX(calc(var(--card-w) * var(--overlap))); }
+
+.rail-card__frame {
+  width: 3.5rem; height: 3.5rem; border-radius: .6rem;
+  background: var(--frame); flex: 0 0 auto;
+  margin-top: .85rem;
+}
+.rail-card__body {
+  display: flex; flex-direction: column; gap: .2rem;
+  margin-bottom: .85rem;
+}
+.rail-card__title { color: var(--heading); font-size: .98rem; line-height: 1.35; }
+.rail-card__meta { color: var(--muted); font-size: .76rem; font-family: var(--ui); min-height: 1em; }
+
+/* ---------- 子页：整页渐变 ---------- */
+/* 容器只作语义锚点：不再有圆角/内边距/裁切，否则 fixed 渐变会被剪掉 */
+.interests-category { position: relative; min-height: 60vh; }
+.interests-gradient {
+  position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background:
+    radial-gradient(100% 120% at 0% 0%, #ffb3ba 0%, transparent 55%),
+    radial-gradient(90% 100% at 100% 10%, #e0baff 0%, transparent 60%),
+    radial-gradient(120% 120% at 50% 100%, #bae1ff 0%, transparent 65%),
+    linear-gradient(180deg, #fff0f4 0%, #f3e8ff 100%);
+}
+:root[data-theme='dark'] .interests-gradient { background:
+    radial-gradient(100% 120% at 0% 0%, color-mix(in srgb, #ff6ec7 55%, transparent) 0%, transparent 45%),
+    radial-gradient(90% 100% at 100% 10%, color-mix(in srgb, #8338ec 50%, transparent) 0%, transparent 50%),
+    radial-gradient(120% 120% at 50% 100%, color-mix(in srgb, #3a0050 70%, transparent) 0%, transparent 60%),
+    linear-gradient(180deg, #2a1a2e 0%, #1b1a19 100%);
+}
+.interests-category__body { position: relative; z-index: 1; }
+.interests-category__count { color: var(--muted); font-family: var(--ui); font-size: .85rem; margin: 0 0 1rem; }
+.interests-category__empty { color: var(--muted); }
+
+/* ---------- 放大浮层（三段式交互） ---------- */
+.interests-overlay { position: fixed; inset: 0; z-index: 60; display: grid; place-items: center; padding: 2vmin; }
+.interests-overlay[hidden] { display: none; }
+.interests-overlay__scrim { position: absolute; inset: 0; background: color-mix(in srgb, var(--bg) 70%, transparent); backdrop-filter: blur(6px); }
+.interests-overlay__stage { position: relative; width: 80vw; height: 80vh; perspective: 1600px; }
+.interests-overlay__inner { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; transition: transform .55s cubic-bezier(.2,.8,.2,1); }
+.interests-overlay[data-state='flipped'] .interests-overlay__inner { transform: rotateY(180deg); }
+.interests-overlay__face { position: absolute; inset: 0; border-radius: 1rem; overflow: hidden; backface-visibility: hidden; }
+.interests-overlay__front { background: var(--surface); border: 1px solid var(--divider); display: grid; place-items: center; }
+.interests-overlay__front-media { position: absolute; inset: 0; display: grid; place-items: center; }
+.interests-overlay__front-media img { width: 100%; height: 100%; object-fit: contain; }
+
+/* 背面：一个可上下滚动的「小页面」。
+   外层只负责边框与圆角，滚动交给内层 —— 内层必须 min-height:0 才滚得动。 */
+.interests-overlay__back {
+  transform: rotateY(180deg); background: var(--surface); border: 1px solid var(--divider);
+  display: flex; flex-direction: column; overflow: hidden;
+}
+.interests-overlay__back-scroll {
+  flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain;
+  padding: clamp(1.5rem, 4vw, 3.5rem);
+  scrollbar-width: thin;
+}
+.interests-overlay__back-scroll::-webkit-scrollbar { width: 8px; }
+.interests-overlay__back-scroll::-webkit-scrollbar-thumb { background: var(--divider); border-radius: 4px; }
+.interests-overlay__doc { max-width: 68ch; margin: 0 auto; }
+.interests-overlay__back-title { color: var(--heading); font-size: clamp(1.3rem, 2.6vw, 2rem); margin: 0 0 1.25rem; line-height: 1.25; }
+.interests-overlay__back-body { color: var(--text); font-size: clamp(.95rem, 1.4vw, 1.1rem); line-height: 1.85; margin: 0; }
+.interests-overlay__back-body + .interests-overlay__back-body { margin-top: 1.1rem; }
+
+.interests-overlay__hint { position: absolute; left: 50%; bottom: 2.5vh; transform: translateX(-50%); color: var(--muted); font-family: var(--ui); font-size: .8rem; z-index: 2; }
+.interests-overlay__close { position: absolute; top: 2.5vh; right: 2.5vw; z-index: 2; padding: .45rem .9rem; border: 1px solid var(--divider); border-radius: 999px; background: var(--surface); color: var(--heading); font: .85rem var(--ui); cursor: pointer; }
+
+/* 轨道上的卡片在粗指针下不依赖 hover */
+@media (pointer: coarse) {
+  .interests-wall:hover .flip-card:not(:hover) { filter: none; }
+  .interests-wall .flip-card:hover { transform: none; }
+  .rail-card:hover { transform: none; }
+  .rail-card:hover ~ .rail-card { transform: none; }
+}
+
+@media (max-width: 720px) {
+  .interests-hero-pair { grid-template-columns: 1fr; }
+  .interests-overlay__stage { width: 92vw; height: 84vh; }
+  .interests-rail__lead { width: clamp(160px, 40vw, 200px); margin-right: 1.25rem; }
+  .rail-card { --card-w: clamp(182px, 47.6vw, 238px); }
+}
+@media (max-width: 560px) {
+  .interests-wall__row { flex-wrap: wrap; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .interests-wall .flip-card { transition: none; }
+  .interests-wall .flip-card:hover { transform: none; }
+  .interests-overlay__inner { transition: none; }
+  .rail-card { transition: none; }
+  .rail-card:hover { transform: none; }
+  .rail-card:hover ~ .rail-card { transform: none; }
+}
+
+/* ---------- 子页面包屑：去高亮底 + 去边框 ---------- */
+/* TerminalPath 由 ContentLayout 渲染，不在 .interests-category 内，
+   因此靠 main[data-plain-path]（由 ContentLayout 的 plainPath prop 输出）来命中。 */
+main[data-plain-path] .terminal-path__line {
+  background: none; border: 0; border-radius: 0; padding: 0;
+}

@@ -11,3 +11,6 @@ tests/artifacts/**
 .DS_Store
 Thumbs.db
 .pnpm-store/
+# fixture 构建可能残留的输出目录（正常已重定向到系统临时目录）
+site/
+dist-fixtures/

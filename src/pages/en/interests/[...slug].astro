@@ -1,0 +1,16 @@
+---
+import InterestsCategoryPage from '../../../components/pages/InterestsCategoryPage.astro';
+import { loadPublicContent } from '../../../lib/content-repository';
+
+export async function getStaticPaths() {
+  return (await loadPublicContent('interests', 'en'))
+    .filter((item) => item.data.slug !== 'interests')
+    .map((item) => ({
+      params: { slug: item.data.slug.slice('interests/'.length) },
+      props: { item },
+    }));
+}
+
+const { item } = Astro.props;
+---
+<InterestsCategoryPage lang="en" {item} />

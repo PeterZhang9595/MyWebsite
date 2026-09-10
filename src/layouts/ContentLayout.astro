@@ -3,10 +3,10 @@ import '../styles/prose.css';
 import BaseLayout from './BaseLayout.astro';
 import TerminalPath from '../components/navigation/TerminalPath.astro';
 import type { Lang, PathSegment } from '../lib/types';
-interface Props { lang: Lang; title: string; description: string; languageHref: string; canonicalPath: string; segments: PathSegment[]; parentHref?: string; searchable?: boolean; article?: boolean; wide?: boolean; alternates?: {hreflang:string;href:string}[]; dates?: {publishedAt:Date;updatedAt:Date}|null }
-const { lang,title,description,languageHref,canonicalPath,segments,parentHref,searchable=false,article=false,wide=false,alternates=[],dates=null } = Astro.props;
+interface Props { lang: Lang; title: string; description: string; languageHref: string; canonicalPath: string; segments: PathSegment[]; parentHref?: string; searchable?: boolean; article?: boolean; wide?: boolean; alternates?: {hreflang:string;href:string}[]; dates?: {publishedAt:Date;updatedAt:Date}|null; /** 面包屑去掉高亮底与边界（兴趣子页用） */ plainPath?: boolean }
+const { lang,title,description,languageHref,canonicalPath,segments,parentHref,searchable=false,article=false,wide=false,alternates=[],dates=null,plainPath=false } = Astro.props;
 ---
-<BaseLayout {lang} {title} {description} {languageHref} {canonicalPath} {alternates} {article} {dates}><main id="main-content" class:list={['content-page', wide && 'content-page--wide']} data-pagefind-body={searchable ? true : undefined} data-pagefind-filter={searchable ? `lang:${lang}` : undefined}><TerminalPath {segments} {parentHref}/><header class="content-header"><h1>{title}</h1><p class="content-description">{description}</p></header><slot /></main></BaseLayout>
+<BaseLayout {lang} {title} {description} {languageHref} {canonicalPath} {alternates} {article} {dates}><main id="main-content" class:list={['content-page', wide && 'content-page--wide']} data-pagefind-body={searchable ? true : undefined} data-pagefind-filter={searchable ? `lang:${lang}` : undefined} data-plain-path={plainPath ? '' : undefined}><TerminalPath {segments} {parentHref}/><header class="content-header"><h1>{title}</h1><p class="content-description">{description}</p></header><slot /></main></BaseLayout>
 <script is:inline>
   document.querySelectorAll('.prose pre').forEach((pre) => { if(pre.querySelector('.code-copy'))return; const button=document.createElement('button');button.type='button';button.className='code-copy';button.textContent='Copy';button.addEventListener('click',async()=>{const text=pre.querySelector('code')?.textContent||'';try{if(!navigator.clipboard)throw new Error('clipboard unavailable');await navigator.clipboard.writeText(text);button.textContent='Copied'}catch{button.textContent='Unavailable'}});pre.append(button); });
 </script>
