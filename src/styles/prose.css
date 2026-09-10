@@ -18,13 +18,16 @@
 .project-card--bare { display: grid; place-items: center; }
 .project-card--bare .project-card__title { position: static; padding: 1rem; text-align: center; background: transparent; border-top: 0; }
 .project-atmosphere { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
-.project-atmosphere__dot { position: absolute; border-radius: 50%; background: var(--text); transform: translate3d(0, 0, 0); }
+/* 静态 transform 必须与 @keyframes dot-float 的 from 完全一致：
+   否则动画启动时浏览器会先把「静态值 → from」当作一段插值渲染，
+   导致刷新后所有点短暂整体平移（约 2s）才进入正常往复。 */
+.project-atmosphere__dot { position: absolute; border-radius: 50%; background: var(--text); transform: translate3d(-5px, 0, 0); }
 @keyframes dot-float {
   from { transform: translate3d(-5px, 0, 0); }
   to { transform: translate3d(5px, -14px, 0); }
 }
 @media (prefers-reduced-motion: no-preference) {
-  .project-atmosphere__dot { animation-name: dot-float; animation-timing-function: ease-in-out; animation-iteration-count: infinite; animation-direction: alternate; }
+  .project-atmosphere__dot { animation-name: dot-float; animation-timing-function: ease-in-out; animation-iteration-count: infinite; animation-direction: alternate; animation-fill-mode: both; }
 }
 @media (max-width: 560px) { .content-page--wide { width: 92%; } .project-grid { grid-template-columns: 1fr; } }
 /* Projects 目录页点云密集区：正文与描述用最深的正文色而非 muted/heading，

@@ -10,7 +10,7 @@ const componentSource = readFileSync(
 
 describe('makeDots', () => {
   it('produces the requested number of dots', () => {
-    expect(makeDots(1500)).toHaveLength(1500);
+    expect(makeDots(1200)).toHaveLength(1200);
     expect(makeDots(0)).toHaveLength(0);
   });
 
@@ -33,13 +33,13 @@ describe('makeDots', () => {
   });
 
   it('is deterministic for a fixed seed', () => {
-    const a = makeDots(1500, 20260910);
-    const b = makeDots(1500, 20260910);
+    const a = makeDots(1200, 20260910);
+    const b = makeDots(1200, 20260910);
     expect(a).toEqual(b);
   });
 
   it('varies positions across dots rather than collapsing to one point', () => {
-    const dots = makeDots(1500);
+    const dots = makeDots(1200);
     const xs = new Set(dots.map((d) => d.x));
     const ys = new Set(dots.map((d) => d.y));
     expect(xs.size).toBeGreaterThan(50);
@@ -47,7 +47,7 @@ describe('makeDots', () => {
   });
 
   it('varies size and opacity instead of a single constant value', () => {
-    const dots = makeDots(1500);
+    const dots = makeDots(1200);
     const sizes = new Set(dots.map((d) => d.size));
     const opacities = new Set(dots.map((d) => d.opacity));
     expect(sizes.size).toBeGreaterThan(1);
@@ -68,9 +68,9 @@ describe('makeDots', () => {
 });
 
 describe('ProjectAtmosphere component', () => {
-  it('renders exactly 1500 dots via makeDots(1500)', () => {
-    // 数量由用户聊天（2026-09-10）多次调密度确认：46 → 60 → 300 → 500 → 900 → 1500。
+  it('renders exactly 1200 dots via makeDots(1200)', () => {
+    // 数量由用户聊天（2026-09-10）多次调密度确认：46 → 60 → 300 → 500 → 900 → 1500 → 1200。
     // 此断言防止有人误调回旧值。
-    expect(componentSource).toMatch(/makeDots\(\s*1500\s*\)/);
+    expect(componentSource).toMatch(/makeDots\(\s*1200\s*\)/);
   });
 });

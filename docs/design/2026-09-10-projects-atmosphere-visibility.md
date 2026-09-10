@@ -401,3 +401,45 @@
 
 - `astro check` 0 errors / 0 warnings；`vitest` 18 文件 60 测试全绿。
 - 视觉验证：重跑 build 后观察 projects 页 h1 / 描述 / 段落是否清晰、不与点云混淆；其他页面的 muted 文字是否仍能区分正文。
+
+---
+
+## 17. 第十七轮迭代：回调数量至 1200 + 修复首帧平移抖动
+
+用户反馈两个问题：**① 数量回调至 1200；② 页面刚刷新时所有点先整体向左卡顿移动约 2s，之后才恢复正常的上下浮动。**
+
+### 17.1 问题 2 根因：静态 `transform` 与 `@keyframes` 起始帧不一致
+
+```css
+/* 修改前 */
+.project-atmosphere__dot { ... transform: translate3d(0, 0, 0); }   /* 静态值 */
+@keyframes dot-float {
+  from { transform: translate3d(-5px, 0, 0); }                       /* 动画起点 */
+  to   { transform: translate3d(5px, -14px, 0); }
+}
+```
+
+`animation-fill-mode` 未指定时默认为 `none`，因此在 `animation-delay`（0–4s）期间元素停在**静态 `transform`** 上；动画启动时浏览器要把「静态值 `translate3d(0,0,0)` → 第一关键帧 `translate3d(-5px,0,0)`」当作一段插值渲染，产生一次**所有点整体向左平移 5px 的过渡**。配合 `ease-in-out` 与 6–12s 的 duration，这段过渡体感约 2s——与用户描述的「先往左卡顿约 2s」完全吻合。
+
+### 17.2 修复
+
+| 项 | 修改前 | 修改后 |
+|---|---|---|
+| `.project-atmosphere__dot` 静态 transform | `translate3d(0, 0, 0)` | **`translate3d(-5px, 0, 0)`**（与 `from` 完全一致） |
+| `animation-fill-mode` | 未指定（`none`） | **`both`**（延迟期即采用起始帧，避免任何插入过渡） |
+
+静态值与起始关键帧一致后，首帧无可插值的差值，刷新即直接进入往复浮动；`animation-fill-mode: both` 进一步保证 `animation-delay` 期间也停在起始帧，消除延迟期的位姿跳变。
+
+### 17.3 数量回调
+
+| 项 | 修改前 | 修改后 |
+|---|---|---|
+| 散点数量 | `makeDots(1500)` | **`makeDots(1200)`** |
+
+尺寸、透明度、位置采样区间、周期（6–12s）、浮动位移（±5px / −14px）**均未改变**。
+
+### 17.4 测试
+
+- `tests/unit/atmosphere-dots.test.ts`：数量断言 1500 → 1200（含「组件硬编码 `makeDots(1200)`」防回退断言）。
+- `astro check` 0 errors / 0 warnings；`vitest` 18 文件 60 测试全绿。
+- 视觉验证：重跑 build 后刷新页面，确认①无整体左移卡顿、②刷新即进入浮动、③密度为 1200 的观感。
