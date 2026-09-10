@@ -125,6 +125,9 @@ authorize changes to:
 If implementation discovers a material scope increase, new dependency, changed
 public interface, or design departure, stop and request renewed approval.
 
+Entering a step of the Superpowers methodology, or completing its brainstorming
+or planning step, does not by itself authorize implementation. See section 16.
+
 ## 7. Documentation map
 
 ### `docs/deployment/`
@@ -370,7 +373,60 @@ design, an approved roadmap, or current implementation documentation:
    a permanent change;
 6. update affected current implementation documentation after acceptance.
 
-## 16. Completion checklist
+## 16. Superpowers 工程方法论兼容规则
+
+用户已批准长期兼容用户级 `superpowers` 技能（v1.0.0）的工程方法论。本节是该永久规则的唯一权威说明，相关历史见 [`../records/2026-09-07-superpowers-compatibility.md`](../records/2026-09-07-superpowers-compatibility.md)。
+
+### 16.1 优先级
+
+当 `superpowers` 的方法论与本文档、活跃测试策略、`AGENTS.md` 或已批准的设计冲突时，**一律以本项目文档为准**。本节的例外清单优先于 superpowers 的默认纪律；本节未覆盖的部分按 superpowers 执行。
+
+### 16.2 步骤映射与授权门
+
+| Superpowers 步骤 | 本项目对应阶段 | 是否需要额外授权 |
+| --- | --- | --- |
+| 1 头脑风暴出规格 | 需求澄清与设计，产出 `docs/design/` 或需求澄清结论 | 否，属于文档阶段 |
+| 2 开隔离工作区 | 创建 git worktree / 分支 | **是**，见 16.3 |
+| 3 写实施计划 | 产出 `docs/implement-roadmap/YYYY-MM-DD-topic.md` | 否，属于文档阶段 |
+| 4 子代理驱动开发 | 已授权范围内的实现 | 需先获得实现授权 |
+| 5 测试驱动开发 | 已授权范围内的实现 | 需先获得实现授权 |
+| 6 代码评审 | 实现过程中的质量检查 | 需先获得实现授权 |
+| 7 收尾开发分支 | 验证、给出合并选项、清理 worktree | 验证否；合并 / PR / 清理**是** |
+
+进入 Superpowers 的某个步骤，或完成其头脑风暴与计划步骤，都**不自动构成**实现授权。实现授权仍然只来自第 6 节定义的明确指令。
+
+### 16.3 Git 工作区
+
+- 创建 worktree、分支或任何 Git 变更仍需用户明确指令。`.worktrees/` 与 `.superpowers/` 已被 `.gitignore` 忽略。
+- 未获授权时，直接在当前分支工作，改动保持未提交，并在适当时机提醒用户更新 Git。
+- 已获授权时，可在独立 worktree 中工作，并在开始前用风险匹配的最小命令确认测试基线干净。
+
+### 16.4 测试驱动开发
+
+- 实现阶段默认测试优先：先写会失败的测试，再写最少实现，再重构。
+- 所有测试代码只放在仓库根 `tests/`，不得放进 `src/`。
+- 纯标记、样式微调、文案修改、内容新增等无法写出有意义的失败测试的任务，不强求 TDD，改用第 12 节与活跃测试策略中风险匹配的验证方式，并在交付时说明理由。
+- 探索性代码若最终不采用，应在交付前删除，不得留在工作树中。
+
+### 16.5 子代理与代码评审
+
+- 子代理只能在已授权范围内执行已批准计划中的任务，无权扩大范围、新增依赖或修改 `docs/requirements/`。
+- 保留两段式评审（规格符合度 → 代码质量）；Critical 级问题阻断推进并回报用户。
+
+### 16.6 收尾
+
+收尾阶段只负责跑完风险匹配的验证、报告结果、列出合并 / 开 PR / 保留 / 丢弃选项并给出建议提交信息。合并、开 PR、清理 worktree 等必须由用户另行明确授权。
+
+### 16.7 不可让渡的边界
+
+以下规则不因使用 superpowers 而放宽：
+
+- `docs/requirements/` 仍然只读；
+- 未经明确授权不改动依赖、构建工具、部署配置、GitHub 设置、Pages、域名、DNS 或密钥；
+- 不做任何未获授权的 Git 变更；
+- 测试通过不等于验收，仍需用户明确接受后才更新 `docs/documents/` 并创建 `docs/records/`。
+
+## 17. Completion checklist
 
 Before presenting any requirement as complete, verify:
 
@@ -381,5 +437,7 @@ Before presenting any requirement as complete, verify:
 - current-state documentation and the historical record were updated only after
   acceptance;
 - environment or deployment documentation was updated when affected;
+- when the Superpowers methodology was used, section 16 was respected and no
+  unauthorized Git, dependency, or deployment change occurred;
 - Git status was reviewed and the user was reminded of an appropriate Git update;
 - no unauthorized Git operation was performed.

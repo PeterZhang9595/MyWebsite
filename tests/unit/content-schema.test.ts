@@ -35,12 +35,13 @@ describe('content schemas', () => {
 
   it('accepts only approved project states', () => {
     const schema = createProjectSchema(image);
+    const slug = 'projects/fixture';
     expect(
-      schema.parse({ ...validContent, slug: 'projects/fixture', status: 'active' })
+      schema.parse({ ...validContent, slug, status: 'active', category: 'research' })
         .status,
     ).toBe('active');
     expect(() =>
-      schema.parse({ ...validContent, status: 'paused' }),
+      schema.parse({ ...validContent, slug, status: 'paused', category: 'research' }),
     ).toThrow();
   });
 });

@@ -1,0 +1,34 @@
+---
+import { render } from 'astro:content';
+import ProjectCard from '../content/ProjectCard.astro';
+import ProjectEntries from '../content/ProjectEntries.astro';
+import { groupByCategory, projectCategoryLabel } from '../../lib/project-categories';
+import { projectChildPages } from '../../lib/project-entries';
+import type { ProjectEntry } from '../../lib/project-entries';
+import type { ContentItem } from '../../lib/content-repository';
+import type { Lang } from '../../lib/types';
+
+const { lang, item, children, entries = [] } = Astro.props as {
+  lang: Lang;
+  item?: ContentItem;
+  children: ContentItem[];
+  entries?: ProjectEntry[];
+};
+
+const Content = item ? (await render(item.entry)).Content : null;
+const reserved = projectChildPages.map((page) => `/${page.key}`);
+const cards = children.filter(
+  (child) => child.data.category && !reserved.some((suffix) => child.data.slug.endsWith(suffix)),
+);
+const grouped = groupByCategory(cards, (child) => child.data.category!);
+---
+{Content && <div class="prose"><Content /></div>}
+<ProjectEntries {lang} {entries} />
+{grouped.map((group) => (
+  <section class="project-group">
+    <h2 class="project-group__title">{projectCategoryLabel(lang, group.category)}</h2>
+    <div class="project-grid">
+      {group.items.map((child) => <ProjectCard {lang} item={child} />)}
+    </div>
+  </section>
+))}

@@ -1,4 +1,5 @@
 import { z } from 'astro/zod';
+import { projectCategories } from './project-categories';
 
 type ImageSchemaFactory = () => z.ZodType;
 
@@ -34,6 +35,7 @@ export function createTipSchema(image: ImageSchemaFactory) {
 
 export function createProjectSchema(image: ImageSchemaFactory) {
   return createCommonContentSchema(image).extend({
+    category: z.enum(projectCategories),
     status: z.enum(['active', 'completed', 'archived']),
     technologies: z.array(z.string().trim().min(1)).default([]),
     repositoryUrl: z.url().optional(),

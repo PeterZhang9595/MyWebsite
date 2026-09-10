@@ -3,6 +3,7 @@ dist/
 .astro/
 .superpowers/
 .worktrees/
+.workbuddy/
 playwright-report/
 test-results/
 tests/artifacts/**

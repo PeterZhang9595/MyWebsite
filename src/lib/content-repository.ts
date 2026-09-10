@@ -1,13 +1,15 @@
 import { getCollection } from 'astro:content';
+import type { ImageMetadata } from 'astro';
 import { getGitDates, resolveContentDates } from './git-dates';
+import type { ProjectCategory } from './project-categories';
 import type { ContentDates, Lang, Section } from './types';
 
 export interface ContentItem {
   id: string;
   data: {
     title: string; description: string; lang: Lang; slug: string; translationKey?: string;
-    draft: boolean; tags: string[]; order?: number; status?: string; technologies?: string[];
-    repositoryUrl?: string; demoUrl?: string; publishedAtOverride?: Date; updatedAtOverride?: Date;
+    draft: boolean; tags: string[]; order?: number; status?: string; category?: ProjectCategory; technologies?: string[];
+    repositoryUrl?: string; demoUrl?: string; cover?: ImageMetadata; publishedAtOverride?: Date; updatedAtOverride?: Date;
   };
   entry: any;
   filePath?: string;

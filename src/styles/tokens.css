@@ -2,11 +2,17 @@
   --bg: #ffffff;
   --text: #282828;
   --heading: #282828;
-  --muted: #676767;
+  /* muted 拉到接近 --text：原 #676767 与 --text 同色段，被深色点云干扰时视觉混淆。
+     加深后保留 muted 是「次要文字」的身份（仍比 heading 轻），但避开点的颜色区间。 */
+  --muted: #2a2a2a;
   --surface: #f3f3f2;
   --divider: #e2e2df;
   --focus: #6657c8;
   --terminal-highlight: #fff9df;
+  /* Project 状态色（浅色主题用 600~800 深档，正文/图标 ≥4.5:1 或 ≥3:1） */
+  --status-active: #185fa5;       /* active  进行中 → 蓝 */
+  --status-completed: #3b6d11;    /* completed 已完成 → 绿 */
+  --status-archived: #a32d2d;     /* archived 已归档 → 红 */
   --reading: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, "Songti SC", STSong, SimSun, serif;
   --ui: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", "PingFang SC", sans-serif;
   --mono: "SFMono-Regular", "SF Mono", Menlo, Monaco, Consolas, "Liberation Mono", monospace;
@@ -17,10 +23,16 @@
   --bg: #1b1a19;
   --text: #e8e5df;
   --heading: #f4f1eb;
-  --muted: #aaa59e;
+  /* 深色主题同步加深 muted：原 #aaa59e 与浅点 #e8e5df 颜色区间太近，会被点云干扰。
+     保留与 --text 的微差（亮度降 ~6%），维持"次要文字"层次。 */
+  --muted: #d6d1c8;
   --surface: #242321;
   --divider: #3b3936;
   --focus: #b7acf5;
   --terminal-highlight: #302c22;
+  /* 深色主题状态色用 100~200 档浅色版本 */
+  --status-active: #85b7eb;
+  --status-completed: #97c459;
+  --status-archived: #f09595;
   color-scheme: dark;
 }

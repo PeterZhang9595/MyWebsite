@@ -1,0 +1,27 @@
+---
+/**
+ * Projects 目录页的散点背景氛围层。
+ *
+ * 纯构建期静态渲染：用固定种子的伪随机把圆点散布在整个视口内，输出为普通 HTML，
+ * 无运行时 JS、无 Canvas。缓慢浮动动画仅动画 transform（GPU 合成），并在
+ * `prefers-reduced-motion: reduce` 下完全关闭。
+ *
+ * 定位为 `position: fixed; inset: 0` 的全视口背景（z-index 低于页面内容），
+ * 滚动时保持不动，铺满整个界面（含左右留白与页脚区），不遮挡内容、不响应指针。
+ *
+ * 散点采样已抽至 `../../lib/atmosphere-dots.ts`（确定性、可单测），可见度参数见
+ * docs/design/2026-09-10-projects-atmosphere-visibility.md。本组件只负责渲染。
+ */
+
+import { makeDots } from '../../lib/atmosphere-dots';
+
+const points = makeDots(1500);
+---
+<div class="project-atmosphere" aria-hidden="true">
+  {points.map((dot) => (
+    <span
+      class="project-atmosphere__dot"
+      style={`left:${dot.x}%;top:${dot.y}%;width:${dot.size}px;height:${dot.size}px;opacity:${dot.opacity};animation-delay:${dot.delay}s;animation-duration:${dot.duration}s;`}
+    />
+  ))}
+</div>

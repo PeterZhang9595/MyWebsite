@@ -1,0 +1,30 @@
+---
+/**
+ * 项目技术栈列表：优先显示对应技术图标（内联 SVG），未收录的技术回退为纯文本，
+ * 绝不伪造品牌图标。
+ */
+import { techIconFor } from '../../data/tech-icons';
+
+interface Props {
+  technologies?: string[];
+}
+const { technologies = [] } = Astro.props;
+---
+{technologies.length > 0 && (
+  <ul class="project-tech">
+    {technologies.map((name) => {
+      const icon = techIconFor(name);
+      return (
+        <li class="project-tech__item">
+          {icon ? (
+            <svg class="project-tech__icon" viewBox="0 0 24 24" role="img" aria-label={icon.title} width="16" height="16" fill="currentColor">
+              <title>{icon.title}</title>
+              <path d={icon.path} />
+            </svg>
+          ) : null}
+          <span>{name}</span>
+        </li>
+      );
+    })}
+  </ul>
+)}

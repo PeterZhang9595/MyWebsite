@@ -7,6 +7,7 @@ translationKey: fixture-project
 draft: false
 publishedAtOverride: 2026-01-01
 updatedAtOverride: 2026-01-02
+category: personal-tool
 status: active
 technologies:
   - Astro

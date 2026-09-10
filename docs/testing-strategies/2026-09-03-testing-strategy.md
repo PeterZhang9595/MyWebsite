@@ -59,6 +59,13 @@ For features and bug fixes with clear programmatic behavior, use a test-first
 workflow where practical. Do not create artificial unit tests for markup or
 configuration when a build or browser check is more meaningful.
 
+When the Superpowers methodology is active and implementation has been
+authorized, test-first becomes the default rather than an option. Markup-only,
+copy, and content tasks remain exempt. All test code still lives in the
+repository-root `tests/` directory. See section 16 of the
+[development strategy](../development/strategy.md) for the full compatibility
+rules and the exceptions.
+
 ### Level 2: page, style, or interaction changes
 
 Run the applicable Level 1 checks, then inspect actual browser rendering.

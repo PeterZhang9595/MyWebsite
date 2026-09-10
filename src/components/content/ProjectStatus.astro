@@ -1,0 +1,31 @@
+---
+/**
+ * 项目完成状态的波纹状态灯。
+ *
+ * 一个低饱和状态圆点为中心，两个同心环错开延时缓慢扩散，表达「进行中/已完成/已归档」。
+ * 颜色来自 `var(--status-*)`，深浅主题自动适配；动画仅在
+ * `prefers-reduced-motion: no-preference` 时启用。
+ *
+ * 该视觉是纯装饰状态指示：真正的状态语义由文字（`label`）承载，颜色不作为唯一传达手段。
+ * 传入 `label` 时渲染成可读徽标；否则（纯装饰点）整块 `aria-hidden`。
+ */
+interface Props {
+  status: string;
+  label?: string;
+}
+const { status, label } = Astro.props;
+const tone =
+  status === 'active' || status === 'completed' || status === 'archived' ? status : null;
+---
+{
+  tone && (
+    <span class="project-status-line">
+      <span class={`status-ripple status-ripple--${tone}`} aria-hidden="true">
+        <span class="status-ripple__ring" />
+        <span class="status-ripple__ring status-ripple__ring--delayed" />
+        <span class="status-ripple__core" />
+      </span>
+      {label && <span class="status-ripple__label">{label}</span>}
+    </span>
+  )
+}

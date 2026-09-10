@@ -10,7 +10,7 @@ button, a { transition: color .18s ease, background-color .18s ease, opacity .18
 :focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; border-radius: 3px; }
 .skip-link { position: fixed; left: 1rem; top: 1rem; z-index: 50; transform: translateY(-180%); background: var(--bg); padding: .5rem .75rem; }
 .skip-link:focus { transform: none; }
-.site-shell { min-height: 100vh; padding: clamp(1.25rem, 3.2vw, 3rem); }
+.site-shell { position: relative; z-index: 1; min-height: 100vh; padding: clamp(1.25rem, 3.2vw, 3rem); }
 .page-frame { width: min(100%, 1440px); margin: 0 auto; }
 .terminal-path { font-family: var(--mono); border-left: 3px solid var(--heading); padding-left: .75rem; color: var(--muted); margin-bottom: 2.25rem; overflow-wrap: anywhere; }
 .terminal-path__line { display: flex; flex-wrap: wrap; gap: .05rem; width: fit-content; max-width: 100%; padding: .22rem .48rem; background: var(--terminal-highlight); border-radius: .22rem; }

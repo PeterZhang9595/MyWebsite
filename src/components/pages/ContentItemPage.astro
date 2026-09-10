@@ -3,11 +3,16 @@ import { render } from 'astro:content';
 import ContentLayout from '../../layouts/ContentLayout.astro';
 import DirectoryIndex from '../content/DirectoryIndex.astro';
 import ArticleMeta from '../content/ArticleMeta.astro';
+import ProjectDirectoryView from './ProjectDirectoryView.astro';
+import ProjectStatus from '../content/ProjectStatus.astro';
+import TechStack from '../content/TechStack.astro';
+import { isProjectStatus, projectStatusLabel } from '../../lib/project-categories';
 import { directChildren, findTranslatedItem, loadPublicContent, type ContentItem } from '../../lib/content-repository';
 import { contentSegments } from '../../lib/content-navigation';
 import { contentPath, withBase } from '../../lib/urls';
 import { sectionPath } from '../../i18n';
 import { buildAlternates } from '../../lib/seo';
+import { buildProjectEntries } from '../../lib/project-entries';
 import type { Lang, Section } from '../../lib/types';
 const { lang, section, item } = Astro.props as { lang: Lang; section: Section; item: ContentItem };
 const other = lang === 'zh' ? 'en' : 'zh';
@@ -19,10 +24,23 @@ const parentSlug = item.data.slug.split('/').slice(0,-1).join('/');
 const parentHref = withBase(parentSlug === section ? sectionPath(lang,section) : contentPath(lang,parentSlug));
 const Content = (await render(item.entry)).Content;
 const children = item.isDirectory ? directChildren(await loadPublicContent(section,lang),item.data.slug) : null;
+const flatChildren = children ? [...children.directories, ...children.articles] : [];
+const isProjectDirectory = section === 'projects' && item.isDirectory;
+const entries = isProjectDirectory && item.data.slug !== section
+  ? buildProjectEntries(lang, item, new Set(flatChildren.map((child) => child.data.slug)))
+  : [];
+const projStatus = isProjectStatus(item.data.status) ? item.data.status : null;
+const projStatusLabel = projStatus ? projectStatusLabel(lang, projStatus) : null;
 ---
-<ContentLayout {lang} title={item.data.title} description={item.data.description} {languageHref} canonicalPath={path} {alternates} segments={contentSegments(lang,section,item.data.slug,item.data.title)} {parentHref} searchable={!item.isDirectory} article={!item.isDirectory} dates={item.dates}>
-  {section === 'projects' && <div class="project-facts" data-pagefind-ignore><span>{item.data.status}</span>{item.data.technologies?.length && <span>{item.data.technologies.join(' · ')}</span>}{item.data.repositoryUrl && <a href={item.data.repositoryUrl}>Repository ↗</a>}{item.data.demoUrl && <a href={item.data.demoUrl}>Demo ↗</a>}</div>}
+<ContentLayout {lang} title={item.data.title} description={item.data.description} {languageHref} canonicalPath={path} {alternates} segments={contentSegments(lang,section,item.data.slug,item.data.title)} {parentHref} searchable={!item.isDirectory} article={!item.isDirectory} dates={item.dates} wide={section === 'projects'}>
+  {section === 'projects' && <div class="project-facts" data-pagefind-ignore>{projStatus && projStatusLabel && <ProjectStatus status={projStatus} label={projStatusLabel}/>}{item.data.technologies?.length ? <TechStack technologies={item.data.technologies}/> : null}{!isProjectDirectory && item.data.repositoryUrl && <a href={item.data.repositoryUrl}>Repository ↗</a>}{!isProjectDirectory && item.data.demoUrl && <a href={item.data.demoUrl}>Demo ↗</a>}</div>}
   {!item.isDirectory && <ArticleMeta dates={item.dates} {lang}/>}
-  <div class="prose"><Content/></div>
-  {children && <DirectoryIndex {lang} {...children}/>}
+  {isProjectDirectory ? (
+    <ProjectDirectoryView {lang} {item} children={flatChildren} {entries}/>
+  ) : (
+    <Fragment>
+      <div class="prose"><Content/></div>
+      {children && <DirectoryIndex {lang} {...children}/>}
+    </Fragment>
+  )}
 </ContentLayout>

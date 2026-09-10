@@ -1,0 +1,18 @@
+---
+import type { ProjectEntry } from '../../lib/project-entries';
+import type { Lang } from '../../lib/types';
+
+const { lang, entries } = Astro.props as { lang: Lang; entries: ProjectEntry[] };
+---
+{entries.length > 0 && (
+  <nav class="project-entries" aria-label={lang === 'zh' ? '项目入口' : 'Project entries'} data-pagefind-ignore>
+    {entries.map((entry) => (
+      <a
+        class="project-entries__item"
+        href={entry.href}
+        target={entry.external ? '_blank' : undefined}
+        rel={entry.external ? 'noopener' : undefined}
+      >{entry.label}</a>
+    ))}
+  </nav>
+)}

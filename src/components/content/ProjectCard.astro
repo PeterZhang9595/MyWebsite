@@ -1,0 +1,14 @@
+---
+import { Image } from 'astro:assets';
+import { contentPath, withBase } from '../../lib/urls';
+import type { ContentItem } from '../../lib/content-repository';
+import type { Lang } from '../../lib/types';
+
+const { lang, item } = Astro.props as { lang: Lang; item: ContentItem };
+const href = withBase(contentPath(lang, item.data.slug));
+const cover = item.data.cover;
+---
+<a class:list={['project-card', !cover && 'project-card--bare']} href={href}>
+  {cover && <Image class="project-card__cover" src={cover} alt="" loading="lazy" />}
+  <h3 class="project-card__title">{item.data.title}</h3>
+</a>

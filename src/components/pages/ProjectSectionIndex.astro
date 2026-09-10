@@ -1,0 +1,27 @@
+---
+import ContentLayout from '../../layouts/ContentLayout.astro';
+import ProjectDirectoryView from './ProjectDirectoryView.astro';
+import ProjectAtmosphere from '../content/ProjectAtmosphere.astro';
+import { directChildren, loadPublicContent } from '../../lib/content-repository';
+import { contentSegments } from '../../lib/content-navigation';
+import { sectionPath, ui } from '../../i18n';
+import { withBase } from '../../lib/urls';
+import { buildAlternates } from '../../lib/seo';
+import type { Lang } from '../../lib/types';
+
+const { lang } = Astro.props as { lang: Lang };
+const items = await loadPublicContent('projects', lang);
+const root = items.find((item) => item.data.slug === 'projects' && item.isDirectory);
+const children = directChildren(items, 'projects');
+const title = root?.data.title ?? ui(lang, 'projects');
+const description = root?.data.description ?? ui(lang, 'empty');
+const other = lang === 'zh' ? 'en' : 'zh';
+---
+<ContentLayout {lang} {title} {description} languageHref={sectionPath(other,'projects')} canonicalPath={sectionPath(lang,'projects')} alternates={buildAlternates(sectionPath('zh','projects'),sectionPath('en','projects'))} segments={contentSegments(lang,'projects','projects',title)} parentHref={withBase(lang==='zh'?'/':'/en/')} wide>
+  <div class="project-section">
+    <ProjectAtmosphere />
+    <div class="project-section__body">
+      <ProjectDirectoryView {lang} item={root} children={[...children.directories, ...children.articles]} />
+    </div>
+  </div>
+</ContentLayout>
