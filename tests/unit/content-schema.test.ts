@@ -43,6 +43,30 @@ describe('content schemas', () => {
   });
 });
 
+describe('project subtitle', () => {
+  const base = { ...validContent, slug: 'projects/fixture', status: 'active' as const, category: 'research' as const };
+
+  it('可以省略（未填写时由组件回退到 description）', () => {
+    expect(createProjectSchema(image).parse(base).subtitle).toBeUndefined();
+  });
+
+  it('填写时被接受并去掉首尾空白', () => {
+    expect(
+      createProjectSchema(image).parse({ ...base, subtitle: '  副标题  ' }).subtitle,
+    ).toBe('副标题');
+  });
+
+  it('空串与纯空格被拒绝（沿用既有 trim() 约定）', () => {
+    const schema = createProjectSchema(image);
+    expect(() => schema.parse({ ...base, subtitle: '' })).toThrow();
+    expect(() => schema.parse({ ...base, subtitle: '   ' })).toThrow();
+  });
+
+  it('只加在 project schema 上，不进公共 schema', () => {
+    expect(createCommonContentSchema(image).parse({ ...validContent, subtitle: '副' })).not.toHaveProperty('subtitle');
+  });
+});
+
 describe('interests schema', () => {
   const interestsBase = { ...validContent, slug: 'interests' };
 

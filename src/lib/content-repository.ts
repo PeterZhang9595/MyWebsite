@@ -9,6 +9,8 @@ export interface ContentItem {
   data: {
     title: string; description: string; lang: Lang; slug: string; translationKey?: string;
     draft: boolean; tags: string[]; order?: number; status?: string; category?: ProjectCategory; technologies?: string[];
+    /** 仅 projects：卡片底部信息条的副标题，未填写时由 ProjectCard 回退到 description */
+    subtitle?: string;
     repositoryUrl?: string; demoUrl?: string; cover?: ImageMetadata; publishedAtOverride?: Date; updatedAtOverride?: Date;
   };
   entry: any;

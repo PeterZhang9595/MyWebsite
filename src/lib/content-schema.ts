@@ -41,6 +41,11 @@ export function createProjectSchema(image: ImageSchemaFactory) {
     repositoryUrl: z.url().optional(),
     demoUrl: z.url().optional(),
     order: z.number().int().optional(),
+    // 卡片底部信息条的副标题。可选：未填写时组件回退显示必填的 `description`
+    // （后者仍承担页面头部说明与 SEO 描述）。
+    // 用 min(1) 而非只 trim()，是为了让「写了键但留空」当场报错，
+    // 避免出现「配了副标题却什么都没显示」这种无声失败。清空请直接删掉该键。
+    subtitle: z.string().trim().min(1).optional(),
   });
 }
 

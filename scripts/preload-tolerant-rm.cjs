@@ -13,11 +13,28 @@
  * scripts/patch-astro-prerender-dir.mjs），并在下面兜一层容错，
  * 保证即使 rm 仍然失败也不会中断构建。
  *
- * ── 问题 2：预渲染 chunk 里的 `import("sharp")` 解析不到 ──
+ * ── 问题 2：预渲染 chunk 里的裸 import 解析不到 ──
  * 预渲染目录一旦挪到临时目录，Astro 产物中的 `sharp_*.mjs` 就会从临时目录
  * 往外找 node_modules，自然找不到 sharp（MissingSharp）。
+ * 2026-09-12 又发现同一类问题的第二个实例：`src/lib/card-body.ts` 里
+ * `import { createMarkdownProcessor } from '@astrojs/markdown-remark'` 会被
+ * Vite 当作外部依赖原样留在 chunk 里，从临时目录同样解析不到
+ * （`Cannot find package '@astrojs/markdown-remark'`）。
  * 不能靠切 cwd 解决：cwd 一离开仓库，任何按 cwd 解析的依赖都会失效。
- * 应对：注册一个 ESM 解析钩子，把裸标识符 `sharp` 强制指向仓库内的真实路径。
+ * 应对：注册一个 ESM 解析钩子 ——
+ *   1. 把裸标识符 `sharp` 强制指向仓库内的真实路径；
+ *   2. 其余标识符**先走默认解析**，只有失败时**再以仓库根的 package.json 作父级
+ *      重试一次**。这一条是通用的：以后再有第三方包进入预渲染 chunk，不必每加一个
+ *      就补一个特例。
+ *
+ * ⚠️ 两个必须记住的约束（都实际踩过）：
+ *   - **必须是「先默认、失败才重试」，不能一上来就用仓库父级解析。**
+ *     否则 pnpm 严格布局下连包自己的内部依赖都会按仓库根去解析 ——
+ *     `@astrojs/markdown-remark` 依赖的 `unified` / `vfile` 等并不在仓库根可解析
+ *     的范围内，会连锁报一串 "Cannot find package 'unified'"。
+ *   - **钩子模块里没有 `import.meta.resolve`**（register() 载入的模块不提供它），
+ *     调用会抛 `resolve is not a function`，且在异步钩子里表现为原始错误被抛出、
+ *     看起来像「钩子根本没生效」。只能用 `nextResolve` 重试。
  *
  * 用法：node --require ./scripts/preload-tolerant-rm.cjs node_modules/astro/bin/astro.mjs build
  */
@@ -86,7 +103,7 @@ fs.promises.rm = async function tolerantRm(target, options) {
   }
 };
 
-// ── 第二部分：把裸标识符 sharp 指回仓库 ──────────────────────────────
+// ── 第二部分：把裸标识符指回仓库 ─────────────────────────────────────
 
 /** 解析仓库内 sharp 的 ESM 入口，失败时返回 null。 */
 function resolveSharpEntry() {
@@ -104,22 +121,43 @@ function resolveSharpEntry() {
 
 const sharpEntry = resolveSharpEntry();
 
-if (sharpEntry) {
+{
   const { pathToFileURL } = require('node:url');
-  const sharpUrl = pathToFileURL(sharpEntry).href;
+  const sharpUrl = sharpEntry ? pathToFileURL(sharpEntry).href : null;
+  // 仓库根 package.json 的 file:// URL，作为「兜底重试解析」的父级。
+  // 预渲染 chunk 落在临时目录，默认解析会从那里往上找 node_modules 而失败；
+  // 换这个父级就等于「请按本仓库的依赖来解析」。
+  const repoParentUrl = pathToFileURL(path.join(process.cwd(), 'package.json')).href;
   // 钩子以独立文件注册：register() 需要在自己的模块作用域里跑。
   const hookSource = `
 const sharpUrl = ${JSON.stringify(sharpUrl)};
+const repoParentUrl = ${JSON.stringify(repoParentUrl)};
+function isBare(specifier) {
+  return !specifier.startsWith('.') && !specifier.startsWith('/')
+    && !specifier.startsWith('node:') && !specifier.includes(':');
+}
 export async function resolve(specifier, context, nextResolve) {
-  if (specifier === 'sharp') {
+  if (sharpUrl && specifier === 'sharp') {
     return { url: sharpUrl, shortCircuit: true };
   }
-  return nextResolve(specifier, context);
+  try {
+    return await nextResolve(specifier, context);
+  } catch (error) {
+    // 默认解析失败（典型场景：chunk 落在临时目录，找不到仓库的 node_modules）。
+    // 此时换用仓库根的 package.json 作为父级再试一次；
+    // 仍然失败就抛回原始错误，避免用误导性的二次错误掩盖真实原因。
+    if (!isBare(specifier)) throw error;
+    try {
+      return await nextResolve(specifier, { ...context, parentURL: repoParentUrl });
+    } catch {
+      throw error;
+    }
+  }
 }
 `;
   const hookPath = path.join(
     require('node:os').tmpdir(),
-    `astro-sharp-resolver-${process.pid}.mjs`,
+    `astro-repo-resolver-${process.pid}.mjs`,
   );
   fs.writeFileSync(hookPath, hookSource, 'utf8');
   try {
@@ -127,7 +165,7 @@ export async function resolve(specifier, context, nextResolve) {
     // 且该错误在 --require 阶段不打印，表现为进程静默退出。
     register(pathToFileURL(hookPath).href);
   } catch (error) {
-    console.warn(`[astro-preload] 注册 sharp 解析钩子失败：${error.message}`);
+    console.warn(`[astro-preload] 注册模块解析钩子失败：${error.message}`);
   }
   process.on('exit', () => {
     try {

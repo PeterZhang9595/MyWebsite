@@ -195,7 +195,23 @@
 .interests-overlay__doc { max-width: 68ch; margin: 0 auto; }
 .interests-overlay__back-title { color: var(--heading); font-size: clamp(1.3rem, 2.6vw, 2rem); margin: 0 0 1.25rem; line-height: 1.25; }
 .interests-overlay__back-body { color: var(--text); font-size: clamp(.95rem, 1.4vw, 1.1rem); line-height: 1.85; margin: 0; }
-.interests-overlay__back-body + .interests-overlay__back-body { margin-top: 1.1rem; }
+/* 背面正文现在由构建期编译的 HTML 承载（`[data-body]` 的直接子节点），
+   块级元素不再只有段落，所以间距改为通用流式规则：
+   相邻块之间留白，首块不留上边距。原来那条
+   `.interests-overlay__back-body + .interests-overlay__back-body` 被它完全覆盖。 */
+.interests-overlay__back-scroll [data-body] > * + * { margin-top: 1.1rem; }
+.interests-overlay__back-scroll [data-body] > :first-child { margin-top: 0; }
+/* 背面窄栏（68ch）里的富内容：图片收窄、公式横向可滚、围栏代码块只求不破版。
+   KaTeX 样式由 prose.css 引入，而本页经 ContentLayout 渲染，故天然可用。 */
+.interests-overlay__back-scroll img { max-width: 100%; height: auto; }
+.interests-overlay__back-scroll .katex-display { overflow-x: auto; overflow-y: hidden; padding: .5rem 0; scrollbar-width: thin; }
+.interests-overlay__back-scroll .katex-display::-webkit-scrollbar { height: 6px; }
+.interests-overlay__back-scroll .katex-display::-webkit-scrollbar-thumb { background: var(--divider); border-radius: 3px; }
+/* 设计上不美化背面代码块（窄栏体验差），但必须不把浮层撑宽。
+   卡片背面编译时关掉了 Shiki（见 src/lib/card-body.ts），所以这里没有语言高亮。 */
+.interests-overlay__back-scroll pre { max-width: 100%; overflow-x: auto; margin: 0; padding: .7rem .85rem; border: 1px solid var(--divider); border-radius: .45rem; background: var(--bg); }
+.interests-overlay__back-scroll pre code { font-family: var(--mono); font-size: .9em; }
+.interests-overlay__back-scroll ul, .interests-overlay__back-scroll ol { padding-left: 1.3rem; }
 
 .interests-overlay__hint { position: absolute; left: 50%; bottom: 2.5vh; transform: translateX(-50%); color: var(--muted); font-family: var(--ui); font-size: .8rem; z-index: 2; }
 .interests-overlay__close { position: absolute; top: 2.5vh; right: 2.5vw; z-index: 2; padding: .45rem .9rem; border: 1px solid var(--divider); border-radius: 999px; background: var(--surface); color: var(--heading); font: .85rem var(--ui); cursor: pointer; }

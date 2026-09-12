@@ -1,12 +1,10 @@
 import { defineConfig } from 'astro/config';
 import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
-import remarkMath from 'remark-math';
-import rehypeKatex from 'rehype-katex';
 import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
-import remarkCallouts from './src/plugins/remark-callouts.ts';
 import { unified } from '@astrojs/markdown-remark';
+import { remarkPlugins, rehypePlugins } from './src/lib/markdown-shared.ts';
 
 // fixture 构建（E2E）把缓存与产物全部放进系统临时目录。
 //
@@ -38,12 +36,15 @@ export default defineConfig({
   integrations: [mdx({ extendMarkdownConfig: true }), sitemap()],
   markdown: {
     processor: unified({
-      remarkPlugins: [remarkMath, remarkCallouts],
-      rehypePlugins: [rehypeKatex],
+      remarkPlugins,
+      rehypePlugins,
     }),
     syntaxHighlight: 'shiki',
     shikiConfig: {
-      themes: { light: 'github-light', dark: 'github-dark' },
+      // 双主题结构刻意保留：深色值走 --shiki-dark / --shiki-dark-bg 变量，
+      // 两套站内主题都渲染深色代码块（见 prose.css 里不带 [data-theme] 前缀的规则）。
+      // 保留变量也意味着「将来想改回亮色主题浅色块」只需动 CSS，不必改这里。
+      themes: { light: 'github-light', dark: 'dark-plus' },
       wrap: false,
     },
   },

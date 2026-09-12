@@ -3,7 +3,13 @@
  * 通用翻面卡牌：点击放大 → 再点击翻面 → 再点击复原。
  *
  * 三段式交互由 `public/scripts/interests.js` 统一驱动，本组件只负责结构：
- * 正面（图片或 CSS 占位）+ 背面信息，以及供脚本读取的 data 属性。
+ * 正面（图片或 CSS 占位）+ 背面信息（`<template>` 承载的构建期 HTML），
+ * 以及供脚本读取的 data 属性。
+ *
+ * 背面正文在**构建期**编译：Markdown → HTML（`src/lib/card-body.ts`，
+ * 会剥离原始 HTML），客户端只 `cloneNode`，不解析任何字符串。
+ * 同一个 `body` 因此被输出两次：`data-body`（纯文本，回退用）与
+ * `<template data-body-rich>`（富文本，首选）。
  *
  * 两种用途：
  * - `variant="hero"`：主页双图，16:9 大图。
@@ -15,6 +21,7 @@
  */
 import { Image } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
+import { renderCardBody } from '../../lib/card-body';
 
 interface Props {
   image?: ImageMetadata;
@@ -45,6 +52,10 @@ const style = [
   isSized ? `width: ${width.toFixed(2)}px;` : '',
   typeof ratio === 'number' ? `--ratio: ${ratio.toFixed(6)};` : '',
 ].filter(Boolean).join(' ');
+
+// 构建期把正文编译成 HTML，交给下面的 <template> 承载。
+// 客户端只做 cloneNode，不解析任何字符串（见 public/scripts/interests.js）。
+const bodyHtml = await renderCardBody(body);
 ---
 
 <button
@@ -72,4 +83,8 @@ const style = [
       {subtitle && <span class="flip-card__subtitle">{subtitle}</span>}
     </span>
   )}
+  {/* 背面富文本载体：<template> 属 phrasing content，可以放在 button 内部；
+      其内容惰性、不参与布局，因此既不会被 Pagefind 索引，也不会影响图文卡片的排版。
+      data-body 属性保留不动，作为纯文本回退数据源。 */}
+  <template data-body-rich set:html={bodyHtml}></template>
 </button>

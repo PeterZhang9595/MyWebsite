@@ -6,17 +6,24 @@
 .project-entries__item:hover { border-color: var(--focus); color: var(--heading); }
 .project-group { margin: 2.75rem 0; }
 .project-group__title { color: var(--heading); font-size: 1.25rem; line-height: 1.3; margin: 0 0 1rem; padding-bottom: .5rem; border-bottom: 1px solid var(--divider); }
-.project-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1rem; }
+.project-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 1rem; }
 .project-section { position: relative; }
 .project-section__body { position: relative; z-index: 1; }
-.project-card { position: relative; display: block; aspect-ratio: 3 / 2; overflow: hidden; border: 1px solid var(--divider); border-radius: .5rem; background: color-mix(in srgb, var(--bg) 25%, transparent); text-decoration: none; transition: filter .18s ease, background-color .18s ease, transform .18s ease; }
+.project-card { position: relative; display: block; aspect-ratio: 5 / 4; overflow: hidden; border: 1px solid var(--divider); border-radius: .5rem; background: color-mix(in srgb, var(--bg) 25%, transparent); text-decoration: none; transition: filter .18s ease, background-color .18s ease, transform .18s ease; }
 .project-card:hover { filter: saturate(.35) brightness(.985); transform: translateY(-1px); }
 .project-card:active { transform: translateY(0); }
 .project-card:hover .project-card__title { color: var(--muted); }
 .project-card__cover { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .9; }
-.project-card__title { position: absolute; left: 0; right: 0; bottom: 0; margin: 0; padding: .7rem .85rem; color: var(--heading); font-size: 1.05rem; line-height: 1.35; background: color-mix(in srgb, var(--bg) 35%, transparent); border-top: 1px solid var(--divider); transition: color .18s ease; }
+/* 底部信息条：绝对定位原先挂在标题上，现在上移到这个容器，
+   好让标题与副标题共享同一块半透明底（封面仍在它下面铺满整张卡）。
+   注意「可见封面高 = 卡片高 − 本容器高」，信息条会随副标题 1 行 / 2 行变化。 */
+.project-card__meta { position: absolute; left: 0; right: 0; bottom: 0; padding: .7rem .85rem; background: color-mix(in srgb, var(--bg) 35%, transparent); border-top: 1px solid var(--divider); }
+.project-card__title { margin: 0; color: var(--heading); font-size: 1.05rem; line-height: 1.35; transition: color .18s ease; }
+/* 副标题：纯文本插值（不给它富文本能力），固定截断为 2 行 */
+.project-card__subtitle { margin: .2rem 0 0; color: var(--muted); font-family: var(--ui); font-size: .85rem; line-height: 1.4; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
 .project-card--bare { display: grid; place-items: center; }
-.project-card--bare .project-card__title { position: static; padding: 1rem; text-align: center; background: transparent; border-top: 0; }
+/* 无封面卡没有需要避让的图，信息条改回静态并交给 place-items 居中 */
+.project-card--bare .project-card__meta { position: static; padding: 1rem; text-align: center; background: transparent; border-top: 0; }
 .project-atmosphere { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
 /* 静态 transform 必须与 @keyframes dot-float 的 from 完全一致：
    否则动画启动时浏览器会先把「静态值 → from」当作一段插值渲染，
@@ -43,9 +50,25 @@
 .prose { max-width: 72ch; }
 .prose h2, .prose h3 { color: var(--heading); line-height: 1.3; margin-top: 2.3em; }
 .prose img { max-width: 100%; height: auto; }
-.prose pre { position: relative; overflow-x: auto; border: 1px solid var(--divider); border-radius: .45rem; padding: 1rem; }
-[data-theme='dark'] .astro-code, [data-theme='dark'] .astro-code span { color: var(--shiki-dark) !important; background-color: var(--shiki-dark-bg) !important; }
-.code-copy { position: absolute; top: .45rem; right: .45rem; border: 1px solid var(--divider); border-radius: .3rem; padding: .25rem .45rem; color: var(--muted); background: var(--bg); font: .75rem/1.2 var(--ui); cursor: pointer; }
+/* 代码块：整块深色底、无边框。边界由色块建立，不再靠一条线。
+   顶部 padding 留出语言标签（左上）与复制按钮（右上）的位置。
+   刻意不写 background —— 底色交给 Shiki 的深色主题变量（见下一条）。 */
+.prose pre { position: relative; overflow-x: auto; border: 0; border-radius: .55rem; padding: 2.35rem 1rem 1rem; }
+/* Shiki 双主题：浅色主题的颜色被写成 <pre> 的**内联** style，
+   深色主题的颜色放在 --shiki-dark / --shiki-dark-bg 里。
+   这里刻意**不带** [data-theme='dark'] 前缀 —— 两套站内主题都渲染深色代码块；
+   将来若要改回「亮色主题浅色块」，把前缀加回来即可，不必动 astro.config.mjs。
+   !important 不可省：它要压过 Shiki 写在内联 style 上的 background-color。
+   ⚠️ 验证时必须读 getComputedStyle —— pre.style.backgroundColor 永远是内联的浅色。 */
+.astro-code, .astro-code span { color: var(--shiki-dark) !important; }
+.astro-code { background-color: var(--shiki-dark-bg) !important; }
+/* 语言标签：data-language 由 Astro 无条件写入（@astrojs/…/shiki.js），无需 transformer。
+   用伪元素而不是新增 DOM 节点，避免破坏 pre > code 结构与复制脚本的选择器。 */
+.prose pre[data-language]::before { content: attr(data-language); position: absolute; top: .55rem; left: .85rem; color: rgba(255, 255, 255, .62); font: .72rem/1 var(--mono); letter-spacing: .06em; text-transform: uppercase; }
+/* 复制按钮：默认隐藏，hover 或键盘聚焦才出现（:focus-within 必需，否则键盘用户永远看不到）。
+   配色必须与深色块配套：沿用 var(--bg) 的浅色底会在近黑块上变成一块刺眼白斑。 */
+.code-copy { position: absolute; top: .45rem; right: .45rem; border: 1px solid rgba(255, 255, 255, .22); border-radius: .3rem; padding: .25rem .45rem; color: rgba(255, 255, 255, .78); background: rgba(255, 255, 255, .09); font: .75rem/1.2 var(--ui); cursor: pointer; opacity: 0; transition: opacity .15s ease; }
+.prose pre:hover .code-copy, .prose pre:focus-within .code-copy { opacity: 1; }
 .prose :not(pre) > code { font-family: var(--mono); color: #a23625; font-size: .9em; }
 :root[data-theme='dark'] .prose :not(pre) > code { color: #ee9182; }
 .prose blockquote { margin: 1.4rem 0; padding: .25rem 0 .25rem 1rem; border-left: 2px solid var(--divider); color: var(--muted); }
@@ -53,7 +76,9 @@
 .prose [data-callout]::before { display: block; margin-bottom: .35rem; color: var(--muted); font: 600 .75rem/1.3 var(--ui); text-transform: uppercase; content: attr(data-callout); }
 .prose table { width: 100%; border-collapse: collapse; display: block; overflow-x: auto; }
 .prose th, .prose td { border: 1px solid var(--divider); padding: .55rem .7rem; text-align: left; }
-.prose .katex-display { overflow-x: auto; overflow-y: hidden; padding: .5rem 0; }
+.prose .katex-display { overflow-x: auto; overflow-y: hidden; padding: .5rem 0; scrollbar-width: thin; }
+.prose .katex-display::-webkit-scrollbar { height: 6px; }
+.prose .katex-display::-webkit-scrollbar-thumb { background: var(--divider); border-radius: 3px; }
 .directory-list { margin: 2rem 0; }
 .directory-list h2 { font-size: 1.25rem; }
 .directory-list ul { padding-left: 1.15rem; }

@@ -2,7 +2,7 @@
 
 ## 文档状态
 
-- 当前版本：网站基础版本
+- 当前版本：网站基础版本 + 2026-09-12 修订（卡片副标题、背面富文本、代码块深色化、图片 base、新增 §16 删除与下线内容）
 - 验收日期：2026-09-04
 - 内容根目录：`src/content/`
 - 本地数据目录：`src/data/`
@@ -195,6 +195,7 @@ tags:
   - web
 category: personal-tool          # 必填，五选一
 status: active                   # 必填
+subtitle: 卡片副标题（可选）
 technologies:
   - Astro
 repositoryUrl: https://github.com/example/project
@@ -222,7 +223,9 @@ order: 1
 
 分区的自上而下顺序、schema 校验、组件渲染都从 `src/lib/project-categories.ts` 的 `projectCategories` 数组取值。**新增一种分类只需要在这个数组里插入一项并补上中英标签**，其余地方会自动跟随。空分组不会渲染标题。
 
-`technologies`、`repositoryUrl`、`demoUrl`、`cover` 和 `order` 可以省略。不要填写不存在的仓库或演示地址。
+`technologies`、`repositoryUrl`、`demoUrl`、`cover`、`subtitle` 和 `order` 可以省略。不要填写不存在的仓库或演示地址。
+
+`subtitle` 是目录卡片底部的副标题（2026-09-12 新增，可选）。省略或为空时回退为 `description`；填写长文本时卡片上固定截断为两行，不会被无限撑高。
 
 `cover` 是相对当前 `.md` 文件的路径，走 Astro 图片优化。从 `src/content/projects/zh/` 下引用 `src/assets/projects/` 里的图片要写 `../../../../assets/projects/xxx.jpg`（四级向上）。有封面时卡片显示图片，没有封面时卡片自动降级为无图样式。
 
@@ -288,6 +291,7 @@ src/content/projects/zh/
   - 缓慢浮动动画只动画 `transform`（GPU 合成）；`prefers-reduced-motion: reduce` 时完全关闭。
   - 采样逻辑抽在 `src/lib/atmosphere-dots.ts`（可单测）；调整参数见该文件与设计文档。
 - **卡片通透度**：卡片底色 `color-mix(in srgb, var(--bg) 25%, transparent)`、底栏 `35%`，底层散点可透过卡片显示（卡片内点强度约为卡片外的 91%）。底栏与图片之间保留 1px 分界线（`border-top: var(--divider)`）；无封面图的 bare 卡片不显示该分界线。
+- **卡片尺寸与比例**（2026-09-12 调整）：目录网格每行 **3 张**（`minmax(300px, 1fr)`，约 1024px 以下容器自动降为 2 列、560px 以下单列）；卡片宽高比固定 **5:4**（标题与副标题所在的底部信息条覆盖在封面下方，封面可见高度随之增加）。无封面的 bare 卡共用同一比例。
 - **卡片 hover**：悬停时整卡 `filter: saturate(.35) brightness(.985)`、标题文字变 `var(--muted)`、轻微下沉 1px；不变紫边框（这与一轮设计 §6.2 的旧决策相反，是迭代修正）。
 
 ## 8. Interests
@@ -317,6 +321,17 @@ order: 1
 
 以后需要 Interests 子页时，应先扩展路由和目录页实现，再添加子内容，避免创建暂时无法访问的文件。
 
+### 8.1 卡片背面的富文本（2026-09-12 起）
+
+Interests 类别卡的 `cards[].body` 支持 Markdown 子集：**段落、行内代码、行内与独立公式、图片、有序/无序列表、粗体斜体、链接**。渲染管线：
+
+- **构建期**把 body 编译成 HTML，原始 HTML 标签（`<script>` 等）一律剥离；
+- 页面把编译结果放进 `<template data-body-rich>`，客户端翻面时只做 `cloneNode`，不解析任何字符串；
+- 背面是 68ch 窄栏：图片自适应限宽，超宽公式横向滚动；代码块不做语法高亮（刻意简化）；
+- 背面图片建议放 `public/` 下并写站点绝对路径（如 `![](/media/interests/a.png)`），会自动补 base；注意这类图片不经过 Astro 压缩，大图请自行控制体积。
+
+纯文本（不含任何 Markdown 语法）的 body 行为不变。
+
 ## 9. 中英文译文
 
 英文文件放入相同栏目的 `en/` 目录，使用同一公共 slug 结构和相同 `translationKey`：
@@ -341,7 +356,7 @@ const answer = 42;
 ```
 ````
 
-构建阶段由 Shiki 高亮，页面会提供复制按钮。行内代码使用单个反引号。
+构建阶段由 Shiki 高亮。代码块在**浅色与深色两套站内主题下都渲染 VS Code 式深色底**（`dark-plus` 主题，2026-09-12 起生效），左上角显示语言标签，右上角的复制按钮悬停代码块（或键盘聚焦）时才出现；超长单行横向滚动、不折行。行内代码使用单个反引号。
 
 GitHub 风格提示块支持 `NOTE`、`TIP`、`IMPORTANT`、`WARNING`：
 
@@ -360,20 +375,25 @@ $$
 $$
 ```
 
-KaTeX 在构建阶段渲染，不需要浏览器运行 MathJax。
+KaTeX 在构建阶段渲染，不需要浏览器运行 MathJax。注意独立公式必须把 `$$` 写成独占一行；行内写法 `$$...$$` 会被当作行内公式处理。超宽公式在 72ch 正文内横向滚动。
 
 ## 11. 图片与媒体
 
-- 与文章一起维护、需要 Astro 优化的图片：放在内容文件附近或 `src/assets/`，通过相对路径引用；
-- 需要稳定原始 URL 的视频和音频：放在 `public/media/`；
-- 原始素材与许可证：放在根目录 `assets/`；
-- 大型媒体加入仓库前必须重新评估体积、加载策略和版权。
+两条路径分工明确，不要混用：
+
+- **与文章一起维护、需要 Astro 优化的图片**：放在内容文件附近或 `src/assets/`，通过相对路径引用；
+- **需要稳定原始 URL 的视频和音频**：放在 `public/media/`；
+- **Interests 卡片背面配图**：走 `public/`，写站点绝对路径（见 §8.1）；
+- **原始素材与许可证**：放在根目录 `assets/`；
+- **大型媒体加入仓库前必须重新评估体积、加载策略和版权**。
 
 Markdown 图片示例：
 
 ```markdown
 ![替代文字](./diagram.png)
 ```
+
+以 `/` 开头的站点根相对地址（如 `![](/media/a.png)`、`[链接](/notes/foo/)`）会自动补上 `/MyWebsite` base（2026-09-12 起，文章正文与 Interests 卡片背面均适用），数据中不要手动写 `/MyWebsite`。
 
 替代文字应描述图片提供的信息，而不是只写“图片”。
 
@@ -445,3 +465,39 @@ Markdown 图片示例：
 - `src/assets/projects/large-platform.jpg`，占位封面图（脚本生成的抽象图形，非真实截图）
 
 `tests/fixtures/content/` 中的内容全部是自动化测试数据，不进入正式生产构建，无需改写为个人内容。
+
+## 16. 删除与下线内容
+
+本节回答「怎么把内容拿下来」。核心原则：**临时拿下来用 `draft: true`，永久拿下来才删文件**，删完必须重新构建。
+
+### 16.1 下线 ≠ 删除
+
+- 想把某篇内容暂时从站点撤下：把 frontmatter 的 `draft` 改为 `true`（公共 schema 默认就是 `true`），不要删文件。草稿不生成路由、不进搜索、不进 sitemap，源文件和 Git 历史都还在；
+- 想彻底删除：直接删文件，然后按下文核对副作用，最后重新构建。
+
+### 16.2 各栏目删除要点
+
+| 栏目 / 对象 | 删除要点 |
+| --- | --- |
+| 所有双语内容 | **成对删除 zh / en 两个文件**。只删一边时，另一边 `translationKey` 还在，语言切换按钮会指向一个 404 页面 |
+| Notes / Projects / Interests | 路由是 `[...slug]` catch-all，由 `getStaticPaths` 构建期生成——删了源文件**必须重新构建**，旧 URL 才会真正消失（GitHub Pages 上表现为 404） |
+| 每一级目录 | 目录页靠 `_index.md`（`slug` 等于该层路径）成立。删掉中间层的 `_index.md`，该层 URL 会 404，且**面包屑里指向它的链接变成死链**。删整个子树时连 `_index.md` 一起删 |
+| Tips | `order` 是**必填整数**。删掉某篇后建议检查同栏目剩余项的 `order`，避免出现断档（不影响功能，只影响排序预期） |
+| Projects | `status`（active/completed/archived）必填。删除目录项目时，检查固定入口区引用（`repositoryUrl` / `demoUrl` 是外链不受影响；`features` / `dev-log` 子页随主项目一起删） |
+| Interests | `cards` 是 frontmatter 数组，**删卡只改 `_index.md` 的 `cards`，不影响路由**；删除整个类别子页才影响导航与计数；`heroImages` 最多 2 条 |
+| Bio | 用 `variant`（default/long）区分，中英各两篇，不需要 slug 与日期。删掉某语言的 long bio 后，该语言主页会自动隐藏「完整」按钮 |
+| Recent Focus / 随机句子 | `src/data/*.json` 独立于内容集合。删条目后留意剩余项的 `order`，以及 `url` 字段指向的文章是否还存在（指向已删文章会得到死链） |
+
+### 16.3 删除后的核对清单
+
+1. **双语配对**：zh / en 两边都删了吗？留下的那个 `translationKey` 有没有悬空？
+2. **目录页**：删的是普通文章还是 `_index.md`？中间层目录页还在吗？面包屑有没有死链？
+3. **层级一致**：文件夹层级与 slug 层级是否还一致（见 §7.5）？
+4. **构建**：`pnpm run build` 必须跑一次——路由、搜索索引、sitemap 都在构建期重算；
+5. **搜索抽查**：构建后用站内搜索搜被删文章的标题，确认不再出现；
+6. **404 抽查**：直接访问被删的旧 URL，确认返回的是 404 页而不是缓存旧页。
+
+### 16.4 YAML 书写提醒
+
+给 frontmatter 增删字段时注意：`subtitle: 2026.08` 这类「数字.数字」的值会被 YAML 解析成**数字**，schema 要求 string 时会构建失败，这类值必须加引号。
+

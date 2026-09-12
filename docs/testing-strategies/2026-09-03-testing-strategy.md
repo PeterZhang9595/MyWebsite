@@ -142,6 +142,13 @@ If implementation expands beyond the approved scope, reconsider the test level
 and request renewed authorization when the implementation scope materially
 changes.
 
+Topic-specific testing guidance lives alongside this document in
+`testing-strategies/`. Read it in addition to this policy when the topic matches:
+
+- [`2026-09-12-rich-content-rendering.md`](2026-09-12-rich-content-rendering.md):
+  rendering matrix for images, code blocks, and math across every container that
+  renders them, plus the assertion rules for geometry, overflow, and theme.
+
 ## 5. Visual verification and screenshots
 
 Visual verification must compare the result against the approved design, not

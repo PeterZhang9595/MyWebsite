@@ -78,10 +78,11 @@
   }
 
   /**
-   * 把纯文本按空行拆成多个段落渲染到容器里。
+   * 纯文本回退：把文本按空行拆成多个段落渲染到容器里。
    *
-   * 只用 textContent 赋值，不碰 innerHTML —— 内容虽来自本站自有 md，
-   * 但保持「永不执行字符串里的标记」这条底线，避免后续接编辑器时留下注入面。
+   * 只在卡片里没有 `<template data-body-rich>` 时使用（例如模板被移除、
+   * 或将来某个调用方只提供了 `data-body`）。仍然只用 textContent、
+   * 不碰 innerHTML，保留「永不执行字符串里的标记」这条底线。
    */
   function renderBody(container, text) {
     if (!container) return;
@@ -95,6 +96,24 @@
       p.textContent = chunk;
       container.appendChild(p);
     }
+  }
+
+  /**
+   * 首选路径：克隆构建期编译好的 HTML。
+   *
+   * 这里刻意**不用 innerHTML**：`cloneNode` 直接克隆已经解析好的节点，
+   * 不经过「字符串 → HTML 解析器」这一步，所以能进 DOM 的标签集合
+   * 由构建期插件白名单决定，而不是由内容字符串决定。
+   * 这是对「永不执行字符串里的标记」那条底线的定向反转，边界在此。
+   */
+  function renderRichBody(container, source) {
+    if (!container || !source) return false;
+    var tpl = source.querySelector('template[data-body-rich]');
+    if (tpl && tpl.content) {
+      container.replaceChildren(tpl.content.cloneNode(true));
+      return true;
+    }
+    return false;
   }
 
   function open(source) {
@@ -124,7 +143,10 @@
       if (frame) media.style.setProperty('--frame', frame);
     }
     overlay.querySelector('[data-title]').textContent = source.dataset.flipTitle || source.dataset.title || '';
-    renderBody(overlay.querySelector('[data-body]'), source.dataset.body || '');
+    var bodyTarget = overlay.querySelector('[data-body]');
+    if (!renderRichBody(bodyTarget, source)) {
+      renderBody(bodyTarget, source.dataset.body || '');
+    }
     var scrollRegion = overlay.querySelector('.interests-overlay__back-scroll');
     if (scrollRegion) {
       scrollRegion.setAttribute('aria-label', labels.scroll);
