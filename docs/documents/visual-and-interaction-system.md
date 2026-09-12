@@ -4,6 +4,7 @@
 
 - 当前版本：网站基础版本
 - 验收日期：2026-09-04
+- 最近变更：2026-09-12 移除音乐播放器（见第 13 节）
 - 样式入口：`src/styles/`
 - 相关设计：[网站基础版本设计](../design/2026-09-03-website-setup.md)
 - 架构说明：[网站架构与维护接口](website-architecture.md)
@@ -26,7 +27,7 @@ Tip 详情页最终效果：
 
 ![中文 Tip 详情页浅色效果](assets/2026-09-03-website-setup/tip-light-desktop.png)
 
-截图使用正式内容源生成；其中的 Bio、Tip、Recent Focus、句子和栏目说明仍是已披露的助手临时排版文字。
+截图使用正式内容源生成；其中的 Bio、Tip、Recent Focus、句子和栏目说明仍是已披露的助手临时排版文字。以上三张截图的拍摄时间早于音乐播放器移除，其中仍包含播放器。
 
 ## 2. 设计变量
 
@@ -75,7 +76,7 @@ SimSun,
 serif
 ```
 
-`--ui` 用于按钮、元数据、搜索和播放器；`--mono` 用于终端路径和代码。网站只引用系统已有字体，不分发 Iowan 字体文件。不同平台使用后备字体产生的字形差异是当前接受的维护取舍。
+`--ui` 用于按钮、元数据、搜索和工具栏；`--mono` 用于终端路径和代码。网站只引用系统已有字体，不分发 Iowan 字体文件。不同平台使用后备字体产生的字形差异是当前接受的维护取舍。
 
 正文基础字号为 `17px`、行高 `1.68`；小于 `560px` 时字号降为 `16px`。头像下的 `Peter Zhang` 使用 `clamp(1.75rem, 3.4vw, 2.35rem)`，保持清晰但不压过头像和正文。
 
@@ -89,12 +90,12 @@ serif
 grid-template-columns: minmax(0, 1.72fr) minmax(320px, 1fr);
 ```
 
-左栏最大宽度 `720px`；右栏在桌面 sticky，并使用 `padding-top: clamp(5.5rem, 11vh, 8rem)` 与右上工具栏拉开距离。
+左栏最大宽度 `720px`；右栏在桌面 sticky，并使用 `padding-top: clamp(7rem, 14vh, 10rem)` 与右上工具栏拉开距离。右栏内的插画最小高度为 `64vh`。
 
 断点：
 
-- `880px`：主页改为单栏，右侧媒体回到文档流，插画最小高度改为 `280px`；
-- `560px`：增加顶部空间容纳工具栏，Recent Focus/Tips 和栏目入口改为单列，播放器宽度调整为 `92%`。
+- `880px`：主页改为单栏，右侧媒体回到文档流，右栏顶部间距降为 `2.5rem`，插画最小高度改为 `320px`；
+- `560px`：增加顶部空间容纳工具栏，Recent Focus/Tips 和栏目入口改为单列。
 
 内容页正文容器最大宽度 `760px`，正文行宽最大 `72ch`。代码和表格只在自身内部横向滚动，不能让整页产生横向滚动。
 
@@ -187,13 +188,17 @@ interface Props {
 
 正式封面优先放在 `src/assets/`；需要稳定 URL 的视频放在 `public/media/illustration/`。不得使用未授权素材。
 
-## 13. 播放器扩展接口
+右栏主页由 `src/components/media/PersonalMedia.astro` 组合随机句子与插画两件。
 
-组件：`src/components/media/MusicPlayerShell.astro`；数据：`src/data/music.json`。
+## 13. 音乐播放器（已移除）
 
-当前数组为空，播放器显示“播放列表待添加 / Playlist pending”，播放按钮禁用，不创建 Audio 实例。桌面播放器宽度为视觉栏的 `82%`，轻微叠在插画下缘；移动端回归正常文档流。
+音乐播放器于 2026-09-12 移除，右栏不再包含任何播放控件。用户明确要求删除，并选择连同数据层一并清理。
 
-未来曲目字段包括 `id`、`title`、`artist`、`src`、可选 `cover`、`copyright` 和 `sourceUrl`。完整播放、进度、列表切换与跨页连续播放尚未实现，不能仅通过填 JSON 假定这些能力存在。
+删除内容：组件 `src/components/media/MusicPlayerShell.astro`、数据 `src/data/music.json`、`src/lib/local-data.ts` 中的 `musicSchema` 与 `loadMusic()`、`src/styles/global.css` 中的 `.player` 与 `.player__disc`、文案键 `playlistPending`，以及 `public/media/audio/` 占位目录。
+
+`docs/requirements/2026-09-03-website-setup.md` 中“右下角可收缩音乐播放器”一条仍保留在需求文档里（需求文档由用户所有，不因实现变动而改写），但当前明确不在实现范围内。将来若要恢复，需要重新建立 schema、数据文件和浏览器测试，不能假定旧接口仍然存在。
+
+详细变更清单与回归证据见 [`docs/records/2026-09-12-remove-music-player.md`](../records/2026-09-12-remove-music-player.md)。
 
 ## 14. 文章排版
 

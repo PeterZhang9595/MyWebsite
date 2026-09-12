@@ -144,13 +144,12 @@ CI 和部署 workflow 因此使用完整历史 checkout（`fetch-depth: 0`）。
 
 ## 9. 本地数据接口
 
-`src/lib/local-data.ts` 在构建阶段校验三个 JSON 文件：
+`src/lib/local-data.ts` 在构建阶段校验两个 JSON 文件：
 
 - `src/data/recent-focus.json`：`id`、中英文标题、可选说明、可选 URL、`order`；站内 URL 在页面输出时统一经过 `localDataHref`；
-- `src/data/quotes.json`：`id`、`text`、可选作者和来源、文本语言；
-- `src/data/music.json`：`id`、曲名、作者、本地音频路径、可选封面、版权和来源 URL。
+- `src/data/quotes.json`：`id`、`text`、可选作者和来源、文本语言。
 
-这些数据不通过网络获取。音乐文件未来放在 `public/media/audio/`，但必须先核对版权和仓库体积。
+这些数据不通过网络获取。音乐播放器及其数据接口已于 2026-09-12 移除，当时一并删除了 `music.json`、`musicSchema`、`loadMusic()` 与 `public/media/audio/`，详见 [`docs/records/2026-09-12-remove-music-player.md`](../records/2026-09-12-remove-music-player.md)。
 
 ## 10. 搜索、SEO 与构建顺序
 

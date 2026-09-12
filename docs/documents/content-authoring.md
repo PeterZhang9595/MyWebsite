@@ -419,25 +419,11 @@ Markdown 图片示例：
 
 当前界面只显示 `text`，但保留作者和来源字段供后续扩展。不要录入来源不明且可能存在版权问题的大段文字。
 
-## 14. 音乐数据
+## 14. 音乐数据（已移除）
 
-当前 `src/data/music.json` 为空，因此播放器显示待添加状态。未来单曲结构：
+音乐播放器及其数据接口已于 2026-09-12 移除：`src/data/music.json`、`musicSchema`、`loadMusic()` 和 `public/media/audio/` 均已删除。不要再按曲目结构写入该文件，也不要把音频放进 `public/media/`。
 
-```json
-[
-  {
-    "id": "track-id",
-    "title": "曲名",
-    "artist": "作者",
-    "src": "/media/audio/file.mp3",
-    "cover": "/media/audio/cover.jpg",
-    "copyright": "版权或授权说明",
-    "sourceUrl": "https://example.com/source"
-  }
-]
-```
-
-只有具备明确使用权的音频才能加入。当前播放器只是首版外壳；加入曲目数据不等于完整播放、进度或跨页面连续播放已经实现。
+将来若要恢复播放器，需要重新建立 schema、数据文件和浏览器测试，不能假定旧接口仍然存在。决策记录见 [`docs/records/2026-09-12-remove-music-player.md`](../records/2026-09-12-remove-music-player.md)。
 
 ## 15. 当前需要替换的临时文字
 

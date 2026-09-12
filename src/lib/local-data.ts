@@ -1,7 +1,6 @@
 import { z } from 'astro/zod';
 import recentFocusData from '../data/recent-focus.json';
 import quotesData from '../data/quotes.json';
-import musicData from '../data/music.json';
 
 const id = z.string().trim().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
 
@@ -27,26 +26,10 @@ export const quotesSchema = z.array(
   }),
 );
 
-export const musicSchema = z.array(
-  z.object({
-    id,
-    title: z.string().trim().min(1),
-    artist: z.string().trim().min(1),
-    src: z.string().regex(/^\/media\/audio\/[a-zA-Z0-9/._-]+$/),
-    cover: z.string().trim().min(1).optional(),
-    copyright: z.string().trim().min(1),
-    sourceUrl: z.url(),
-  }),
-);
-
 export function loadRecentFocus() {
   return recentFocusSchema.parse(recentFocusData);
 }
 
 export function loadQuotes() {
   return quotesSchema.parse(quotesData);
-}
-
-export function loadMusic() {
-  return musicSchema.parse(musicData);
 }

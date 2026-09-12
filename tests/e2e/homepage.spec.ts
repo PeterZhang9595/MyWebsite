@@ -10,7 +10,6 @@ test('中文主页展示资料、Bio、列表和媒体外壳', async ({ page }) 
   await expect(page.getByText('Fixture 中文完整简介第二段。')).toBeVisible();
   await page.reload();
   await expect(page.getByText('Fixture 中文默认简介。')).toBeVisible();
-  await expect(page.getByText('播放列表待添加')).toBeVisible();
 });
 
 test('主题选择刷新后保持', async ({ page }) => {

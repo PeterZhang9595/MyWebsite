@@ -5,11 +5,7 @@ import {
   createInterestsSchema,
   createProjectSchema,
 } from '../../src/lib/content-schema';
-import {
-  musicSchema,
-  quotesSchema,
-  recentFocusSchema,
-} from '../../src/lib/local-data';
+import { quotesSchema, recentFocusSchema } from '../../src/lib/local-data';
 
 const image = () => z.string();
 
@@ -101,19 +97,5 @@ describe('local data schemas', () => {
   it('accepts empty first-version data', () => {
     expect(recentFocusSchema.parse([])).toEqual([]);
     expect(quotesSchema.parse([])).toEqual([]);
-    expect(musicSchema.parse([])).toEqual([]);
-  });
-
-  it('requires provenance for future music', () => {
-    expect(() =>
-      musicSchema.parse([
-        {
-          id: 'track-1',
-          title: 'Track',
-          artist: 'Artist',
-          src: '/media/audio/track.mp3',
-        },
-      ]),
-    ).toThrow();
   });
 });
